@@ -113,7 +113,6 @@ def tdwg(args):
     """
     try:
         import fiona
-        from shapely.geometry import Point
     except ImportError:
         args.log.error('fiona and shapely must be installed for this command')
         return
@@ -135,7 +134,7 @@ def tdwg(args):
                         and spec['code']:
                     continue
 
-                region, dist = geo.match(Point(spec['lon'], spec['lat']), regions)
+                region, dist = geo.match(spec['lon'], spec['lat'], regions)
                 spec['name'] = region['properties']['REGION_NAM']
                 spec['code'] = region['properties']['TDWG_CODE']
 

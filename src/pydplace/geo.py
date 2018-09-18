@@ -1,10 +1,15 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 
-from shapely.geometry import shape, Point
+try:
+    from shapely.geometry import shape, Point
+except ImportError:
+    shape, Point = None, None
 
 
 def match(lon, lat, features):
+    if not shape:
+        return None, None
     point = Point(lon, lat)
     mindist, nearest = None, None
     for feature in features:

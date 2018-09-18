@@ -1,11 +1,9 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 import re
-from functools import partial
 from itertools import groupby, chain
 
 import attr
-from clldutils.text import split_text
 from clldutils.dsv import reader
 from clldutils.path import read_text
 from clldutils.misc import UnicodeMixin
@@ -15,11 +13,10 @@ from clldutils import jsonlib
 from nexus import NexusReader
 from pyglottolog.references import BibFile
 
+from pydplace.util import comma_split, semicolon_split
+
 __all__ = ['Variable', 'Reference', 'Data', 'Society', 'Dataset',
            'Taxon', 'Phylogeny', 'Repos']
-
-comma_split = partial(split_text, separators=',', strip=True, brackets={})
-semicolon_split = partial(split_text, separators=';', strip=True, brackets={})
 
 
 @attr.s

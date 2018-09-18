@@ -5,11 +5,15 @@ Recreate glottolog data files from the current version published at http://glott
 from __future__ import unicode_literals
 import re
 from itertools import groupby
-import shutil
 
 from csvw.dsv import UnicodeWriter, reader
 from ete3 import Tree
+from ete3.coretype.tree import TreeError
 from pyglottolog.api import Glottolog
+
+from pydplace.util import comma_join, remove_subdirs
+
+__all__ = ['update']
 
 NEXUS_TEMPLATE = """#NEXUS
 Begin trees;
@@ -36,18 +40,11 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
         ))
     
     with UnicodeWriter(fname.joinpath('taxa.csv')) as writer:
-        writer.writerow([
-            'taxon',
-            'glottocode',
-            'xd_ids',
-            'soc_ids'])
+        writer.writerow(['taxon', 'glottocode', 'xd_ids', 'soc_ids'])
         for gc in sorted(taxa_in_dplace):
             socs = societies_by_glottocode[gc]
             writer.writerow([
-                gc,
-                gc,
-                ', '.join(set(s.xd_id for s in socs)),
-                ', '.join(s.id for s in socs)])
+                gc, gc, comma_join(set(s.xd_id for s in socs)), comma_join(s.id for s in socs)])
     return tree
 
 
@@ -62,9 +59,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
     glottocodes_in_global_tree = set()
     index = {}
     outdir = outdir / 'phylogenies'
-    for d in outdir.glob('glottolog_*'):
-        if d.is_dir():
-            shutil.rmtree(str(d))
+    remove_subdirs(outdir, 'glottolog_*')
     languoids = {}
     families = []
     for lang in langs:

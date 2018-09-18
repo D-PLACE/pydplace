@@ -3,13 +3,13 @@ from __future__ import unicode_literals, print_function, division
 
 try:
     from shapely.geometry import shape, Point
-except ImportError:
+except ImportError:  # pragma: no cover
     shape, Point = None, None
 
 
 def match(lon, lat, features):
     if not shape:
-        return None, None
+        return None, None  # pragma no cover
     point = Point(lon, lat)
     mindist, nearest = None, None
     for feature in features:

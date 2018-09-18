@@ -9,3 +9,5 @@ before_cache: rm -f $HOME/.cache/pip/log/debug.log
 install: pip install .[test] codecov
 script: pytest
 after_success: codecov
+virtualenv:
+  system_site_packages: true

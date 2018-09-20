@@ -122,7 +122,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
                 writer.writerow([index[phylo['id']][k] for k in header])
                 del index[phylo['id']]
             else:
-                writer.writerow(phylo.values())
+                writer.writerow(list(phylo.values()))
 
         for id_, spec in sorted(index.items()):
             writer.writerow([spec[k] for k in header])

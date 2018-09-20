@@ -27,6 +27,7 @@ setup(
     platforms='any',
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     install_requires=[
+        'attrs>=18.1',
         'clldutils>=2.5.1',
         'csvw>=1.4.2',
         'attrs>=17.3',

@@ -8,7 +8,6 @@ from itertools import groupby
 
 from csvw.dsv import UnicodeWriter, reader
 from ete3 import Tree
-from ete3.coretype.tree import TreeError
 from pyglottolog.api import Glottolog
 
 from pydplace.util import comma_join, remove_subdirs
@@ -31,7 +30,7 @@ def reference(title, year):
 def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
     if not fname.exists():
         fname.mkdir()
-    tree.prune([n for n in taxa_in_dplace])
+    tree.prune([str(n) for n in taxa_in_dplace])
 
     with fname.joinpath('summary.trees').open('w', encoding="utf-8") as handle:
         handle.write(NEXUS_TEMPLATE.format(

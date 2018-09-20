@@ -26,7 +26,7 @@ def readme(args):
                     '[{0}]({1}/{2})'.format(obj.name, datatype, obj.id),
                     obj.reference])
         md.append(t.render(condensed=False))
-    write_text(args.repos.dir.joinpath('SOURCES.md'), '\n'.join(md))
+    write_text(args.repos.path('SOURCES.md'), '\n'.join(md))
 
 
 @command()
@@ -205,10 +205,11 @@ def extract(args):
         ]
         out.writerow(header)
 
+        socs = args.repos.societies
         for record in args.repos.iter_data(
             datasets=datasets, variables=variables, societies=societies):
 
-            s = args.repos.societies.get(record.soc_id, None)
+            s = socs.get(record.soc_id, None)
             if s is None:
                 # we get these warnings as we are currently missing the SCCS
                 # and WNAI data

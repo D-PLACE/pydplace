@@ -245,7 +245,7 @@ class Repos(API):
     
     def iter_data(self, datasets=None, variables=None, societies=None):
         for ds in self.datasets:
-            if datasets and ds.id in datasets:
+            if (datasets is None) or (datasets and ds.id in datasets):
                 for record in ds.data:
                     if variables and record.var_id not in variables:
                         continue

@@ -26,7 +26,6 @@ def test_datasets(repos):
     assert 'ket:' in phy.newick
     assert len(phy.taxa) == 40
 
-    assert not list(repos.iter_data())
     assert len(list(
         repos.iter_data(datasets=['Binford'], societies=['B350'], variables=['B001']))) == 1
 

@@ -83,10 +83,10 @@ def check(args):
             for xdid in taxon.xd_ids:
                 if xdid not in xdids:
                     args.log.error('{0}: invalid xd_id {1}'.format(p.id, xdid))
-        
+
         if not p.nexus:
             args.log.error('{0}: unable to load summary.trees'.format(p.id))
-        
+
         try:
             Tree(p.newick, format=1)
         except NewickError as e:
@@ -118,7 +118,7 @@ def tdwg(args):
         return
 
     def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-        return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+        return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
     with fiona.collection(
             args.repos.path("geo", "level2-shape/level2.shp").as_posix(), "r") as source:
@@ -207,8 +207,7 @@ def extract(args):
 
         socs = args.repos.societies
         for record in args.repos.iter_data(
-            datasets=datasets, variables=variables, societies=societies):
-
+                datasets=datasets, variables=variables, societies=societies):
             s = socs.get(record.soc_id, None)
             if s is None:
                 # we get these warnings as we are currently missing the SCCS
@@ -222,7 +221,7 @@ def extract(args):
                 s.glottocode,
                 s.pref_name_for_society,
                 s.ORIG_name_and_ID_in_this_dataset,
-                s.main_focal_year, 
+                s.main_focal_year,
                 s.Lat,
                 s.Long,
                 record.var_id,

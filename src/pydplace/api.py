@@ -242,7 +242,7 @@ class Repos(API):
 
     def read_json(self, *comps):
         return jsonlib.load(self.path(*comps))
-    
+
     def iter_data(self, datasets=None, variables=None, societies=None):
         for ds in self.datasets:
             if (datasets is None) or (datasets and ds.id in datasets):

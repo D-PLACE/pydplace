@@ -37,7 +37,7 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
             tree.name if tree.name else 'UNTITLED',
             tree.write(format=9)
         ))
-    
+
     with UnicodeWriter(fname.joinpath('taxa.csv')) as writer:
         writer.writerow(['taxon', 'glottocode', 'xd_ids', 'soc_ids'])
         for gc in sorted(taxa_in_dplace):
@@ -69,7 +69,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
 
     glob = Tree()
     glob.name = 'glottolog_global'
-    
+
     for family in sorted(families, key=lambda f: f.name):
         node = family.newick_node(nodes=languoids)
         node.visit(rename)
@@ -77,7 +77,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
         taxa_in_dplace = glottocodes.intersection(taxa_in_tree)
         if not taxa_in_dplace:
             continue
-        
+
         tree = Tree("({0});".format(node.newick), format=3)
         tree.name = 'glottolog_{0}'.format(family.id)
         if family.level.name == 'family':
@@ -92,11 +92,10 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
                 scaling='',
                 reference=reference(title, year),
                 url='https://glottolog.org/resource/languoid/id/{}'.format(family.id))
-                
         else:
             glottocodes_in_global_tree = glottocodes_in_global_tree.union(taxa_in_tree)
         glob.add_child(tree)
-    
+
     # global
     write_tree(
         glob,

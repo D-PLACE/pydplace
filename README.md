@@ -2,6 +2,11 @@
 
 A Python library to access [D-PLACE](https://d-place.org) data. 
 
+[![Build Status](https://travis-ci.org/D-PLACE/pydplace.svg?branch=master)](https://travis-ci.org/D-PLACE/pydplace)
+[![codecov](https://codecov.io/gh/D-PLACE/pydplace/branch/master/graph/badge.svg)](https://codecov.io/gh/D-PLACE/pydplace)
+[![PyPI](https://img.shields.io/pypi/v/pydplace.svg)](https://pypi.org/project/pydplace)
+
+
 To install `pydplace` you need a python installation on your system, running python 2.7 or >3.4. Run
 
 ```

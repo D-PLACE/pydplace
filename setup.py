@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pydplace',
-    version='0.5.0.dev0',
+    version='0.5.0',
     license='Apache 2.0',
     description='programmatic access to D-PLACE/dplace-data',
     long_description=open('README.md').read(),

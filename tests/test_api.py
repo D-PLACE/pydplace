@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function, division
 
 import pytest
 import attr
+from clldutils.path import read_text
 
 from pydplace.api import *
 
@@ -13,9 +14,13 @@ def test_datasets(repos):
     assert len(repos.societies) == 339
     assert len(repos.variables) == 40
 
-    ds = repos.datasets[0]
+    ds = repos.dataset('Binford')
     assert '{0}'.format(ds) == 'Binford Hunter-Gatherer (Binford)'
     assert len(ds.society_relations) == 339
+    ds.societies[0].Comment = '__test__'
+    ds.write()
+    # Make sure the altered attribute is persisted:
+    assert '__test__' in read_text(ds._path('societies'))
 
     for d in ds.data:
         assert len(d.references) == 7
@@ -33,7 +38,8 @@ def test_datasets(repos):
 @pytest.fixture
 def society_attrs():
     res = {k.name: '' for k in attr.fields(Society)}
-    res.update(id='A1', xd_id='xd1', origLat='0', origLong='0', Lat='0', Long='0')
+    res.update(
+        id='A1', xd_id='xd1', origLat='0', origLong='0', Lat='0', Long='0', glottocode='abcd1234')
     return res
 
 

@@ -9,6 +9,7 @@ from itertools import groupby
 from csvw.dsv import UnicodeWriter, reader
 from ete3 import Tree
 from pyglottolog.api import Glottolog
+from pyglottolog.languoids import Level
 
 from pydplace.util import comma_join, remove_subdirs
 
@@ -129,14 +130,25 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
 
 def languoids(langs, outdir):
     with UnicodeWriter(outdir / 'csv' / 'glottolog.csv') as writer:
-        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code'])
+        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id'])
         for lang in sorted(langs, key=lambda l: l.id):
+            if lang.level == Level.language:
+                lid = lang.id
+            elif lang.level == Level.dialect:
+                for _, lid, level in reversed(lang.lineage):
+                    if level == Level.language:
+                        break
+                else:
+                    raise ValueError
+            else:
+                lid = None
             writer.writerow([
                 lang.id,
                 lang.name,
                 lang.lineage[0][1] if lang.lineage else '',
                 lang.lineage[0][0] if lang.lineage else '',
-                lang.iso or ''
+                lang.iso or '',
+                lid,
             ])
 
 

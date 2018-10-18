@@ -43,7 +43,7 @@ def check(args):
                  args.repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
 
     sources = set(e.key for e in args.repos.sources.iterentries())
-    socids, xdids, varids = set(), set(), set()
+    socids, xdids, varids = set(), set(), {}
     for ds in args.repos.datasets:
         for soc in ds.societies:
             if soc.id in socids:
@@ -61,13 +61,17 @@ def check(args):
         for var in ds.variables:
             if var.id in varids:
                 args.log.error('duplicate variable ID: {0}'.format(var.id))
-            varids.add(var.id)
+            varids[var.id] = [c.code for c in var.codes] if var.type == 'Categorical' else None
         # are there undefined variables?
         undefined = set([r.var_id for r in ds.data if r.var_id not in varids])
         for u in undefined:
             args.log.error('undefined variable ID: {0}'.format(u))
 
         for d in ds.data:
+            if d.var_id not in varids:
+                args.log.error('undefined variable ID: {0}'.format(d.var_id))
+            elif varids[d.var_id] and d.code not in varids[d.var_id]:
+                args.log.error('undefined code: {0}:{1}'.format(d.var_id, d.code))
             for ref in d.references:
                 if ref.key not in sources:
                     args.log.error('undefined source key "{0}" referenced in {1}'.format(

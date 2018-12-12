@@ -36,7 +36,7 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
     with fname.joinpath('summary.trees').open('w', encoding="utf-8") as handle:
         handle.write(NEXUS_TEMPLATE.format(
             tree.name if tree.name else 'UNTITLED',
-            tree.write(format=9)
+            tree.write(format=1)
         ))
 
     with UnicodeWriter(fname.joinpath('taxa.csv')) as writer:
@@ -44,7 +44,10 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
         for gc in sorted(taxa_in_dplace):
             socs = societies_by_glottocode[gc]
             writer.writerow([
-                gc, gc, comma_join(set(s.xd_id for s in socs)), comma_join(s.id for s in socs)])
+                gc,
+                gc,
+                comma_join(sorted(set(s.xd_id for s in socs))),
+                comma_join(sorted(s.id for s in socs))])
     return tree
 
 
@@ -130,7 +133,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
 
 def languoids(langs, outdir):
     with UnicodeWriter(outdir / 'csv' / 'glottolog.csv') as writer:
-        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id'])
+        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id', 'macroarea', 'lineage'])
         for lang in sorted(langs, key=lambda l: l.id):
             if lang.level == Level.language:
                 lid = lang.id
@@ -149,6 +152,8 @@ def languoids(langs, outdir):
                 lang.lineage[0][0] if lang.lineage else '',
                 lang.iso or '',
                 lid,
+                lang.macroareas[0].value if lang.macroareas else '',
+                '/'.join(gc for _, gc, _ in lang.lineage),
             ])
 
 

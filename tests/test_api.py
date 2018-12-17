@@ -52,7 +52,7 @@ def society_attrs():
         dict(Lat=-100),
     ]
 )
-def test_Societey_invalid(society_attrs, update):
+def test_Society_invalid(society_attrs, update):
     society_attrs.update(update)
     with pytest.raises(ValueError):
         Society(**society_attrs)

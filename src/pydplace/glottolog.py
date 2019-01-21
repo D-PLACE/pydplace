@@ -133,7 +133,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
 
 def languoids(langs, outdir):
     with UnicodeWriter(outdir / 'csv' / 'glottolog.csv') as writer:
-        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id', 'macroarea', 'lineage'])
+        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id', 'macroarea', 'lineage', 'level'])
         for lang in sorted(langs, key=lambda l: l.id):
             if lang.level == Level.language:
                 lid = lang.id
@@ -154,6 +154,7 @@ def languoids(langs, outdir):
                 lid,
                 lang.macroareas[0].value if lang.macroareas else '',
                 '/'.join(gc for _, gc, _ in lang.lineage),
+                lang.level.name,
             ])
 
 

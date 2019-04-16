@@ -1,14 +1,16 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
+from datetime import date
 
 from ete3 import Tree
 from ete3.parser.newick import NewickError
 
 from clldutils.clilib import command, ParserError
-from clldutils.path import write_text
+from clldutils.path import write_text, Path
 from clldutils.markup import Table
 from clldutils.jsonlib import update_ordered
 from clldutils.dsv import UnicodeWriter
+from clldutils.apilib import assert_release
 
 from pydplace import geo
 from pydplace import glottolog
@@ -102,13 +104,13 @@ def check(args):
 def glottolog_(args):
     """Update data derived from Glottolog
 
-    dplace glottolog PATH/TO/GLOTTOLOG/REPOS YEAR VERSION
+    dplace glottolog PATH/TO/GLOTTOLOG/REPOS
     """
-    if len(args.args) != 3:
-        raise ParserError('not enough arguments')
-    year, version = args.args[1:3]
-    title = "Glottolog {0}".format(version)
-    glottolog.update(args.repos, args.args[0], year, title)
+    if len(args.args) < 1:
+        raise ParserError('No path to Glottolog repos passed')
+    gl_repos = Path(args.args[0])
+    version = assert_release(gl_repos)
+    glottolog.update(args.repos, gl_repos, str(date.today().year), "Glottolog {0}".format(version))
 
 
 @command()

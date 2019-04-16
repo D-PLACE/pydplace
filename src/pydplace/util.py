@@ -1,11 +1,9 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 from functools import partial
 import types
 import shutil
+from pathlib import Path
 
 from clldutils.text import split_text
-from clldutils.path import Path
 
 __all__ = ['comma_split', 'semicolon_split', 'remove_subdirs', 'comma_join']
 

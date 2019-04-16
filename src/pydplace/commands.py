@@ -1,12 +1,11 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 from datetime import date
+from pathlib import Path
 
 from ete3 import Tree
 from ete3.parser.newick import NewickError
 
 from clldutils.clilib import command, ParserError
-from clldutils.path import write_text, Path
+from clldutils.path import write_text
 from clldutils.markup import Table
 from clldutils.jsonlib import update_ordered
 from clldutils.dsv import UnicodeWriter

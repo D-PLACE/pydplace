@@ -11,7 +11,6 @@ The basic invocation looks like
     dplace [OPTIONS] <command> [args]
 
 """
-from __future__ import unicode_literals, division, print_function
 import sys
 
 from clldutils.clilib import ArgumentParserWithLogging

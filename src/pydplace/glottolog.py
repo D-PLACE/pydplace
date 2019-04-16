@@ -1,8 +1,6 @@
-# coding: utf8
 """
 Recreate glottolog data files from the current version published at http://glottolog.org
 """
-from __future__ import unicode_literals
 import re
 from itertools import groupby
 

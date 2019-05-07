@@ -2,7 +2,8 @@ import re
 from itertools import groupby, chain
 
 import attr
-from clldutils.dsv import reader, UnicodeWriter
+from csvw.dsv import UnicodeWriter
+from csvw.dsv import reader as base_reader
 from clldutils.path import read_text
 from clldutils.misc import UnicodeMixin, lazyproperty
 from clldutils.apilib import API
@@ -17,6 +18,13 @@ __all__ = ['Variable', 'Reference', 'Data', 'Society', 'Dataset',
            'Taxon', 'Phylogeny', 'Repos']
 
 ID_PATTERN = re.compile('[A-Za-z]+([0-9]+)?')
+
+
+def reader(*args, **kw):
+    for row in base_reader(*args, **kw):
+        if isinstance(row, dict) and None in row:
+            raise ValueError('too many columns in row {0}'.format(row))
+        yield row
 
 
 @attr.s
@@ -292,6 +300,7 @@ class Taxon(object):
     glottocode = attr.ib()
     xd_ids = attr.ib(converter=comma_split)
     soc_ids = attr.ib(converter=comma_split)
+    isocode = attr.ib(default=None)
 
 
 @attr.s

@@ -1,5 +1,6 @@
 from datetime import date
 from pathlib import Path
+import collections
 
 from ete3 import Tree
 from ete3.parser.newick import NewickError
@@ -44,12 +45,14 @@ def check(args):
                  args.repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
 
     sources = set(e.key for e in args.repos.sources.iterentries())
-    socids, xdids, varids = set(), set(), {}
+    socids, xdids, gcs, varids = \
+        set(), collections.defaultdict(set), collections.defaultdict(set), {}
     for ds in args.repos.datasets:
         for soc in ds.societies:
             if soc.id in socids:
                 args.log.error('duplicate society ID: {0}'.format(soc.id))
-            xdids.add(soc.xd_id)
+            xdids[soc.xd_id].add(soc.glottocode)
+            gcs[soc.glottocode].add(soc.xd_id)
             socids.add(soc.id)
             label = '{0} society {1}'.format(ds.id, soc)
             if soc.glottocode not in glottolog:
@@ -78,6 +81,16 @@ def check(args):
                 if ref.key not in sources:
                     args.log.error('undefined source key "{0}" referenced in {1}'.format(
                         ref.key, ds.id))
+
+    for gc, xs in gcs.items():
+        if len(xs) > 1:
+            args.log.debug('Glottocode {0} mapped to multiple xd_ids {1}'.format(gc, xs))
+
+    for xdid, glottocodes in xdids.items():
+        if len(glottocodes - {None}) > 1:
+            # No xd_id can be linked to more than one Glottocode!
+            args.log.error('xd_id {0} mapped to multiple glottocodes {1}'.format(xdid, glottocodes))
+            raise ValueError
 
     for p in args.repos.phylogenies:
         for taxon in p.taxa:

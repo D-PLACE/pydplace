@@ -1,9 +1,5 @@
 from datetime import date
 from pathlib import Path
-import collections
-
-from ete3 import Tree
-from ete3.parser.newick import NewickError
 
 from clldutils.clilib import command, ParserError
 from clldutils.path import write_text
@@ -41,75 +37,7 @@ def ls(args):
 
 @command()
 def check(args):
-    glottolog = {l.id: l for l in
-                 args.repos.read_csv('csv', 'glottolog.csv', namedtuples=True)}
-
-    sources = set(e.key for e in args.repos.sources.iterentries())
-    socids, xdids, gcs, varids = \
-        set(), collections.defaultdict(set), collections.defaultdict(set), {}
-    for ds in args.repos.datasets:
-        for soc in ds.societies:
-            if soc.id in socids:
-                args.log.error('duplicate society ID: {0}'.format(soc.id))
-            xdids[soc.xd_id].add(soc.glottocode)
-            gcs[soc.glottocode].add(soc.xd_id)
-            socids.add(soc.id)
-            label = '{0} society {1}'.format(ds.id, soc)
-            if soc.glottocode not in glottolog:
-                args.log.warn('{0} without valid glottocode {1.glottocode}'.format(
-                    label, soc))
-            elif glottolog[soc.glottocode].family_name == 'Bookkeeping':
-                args.log.warn('{0} mapped to Bookkeeping language: {1.glottocode}'.format(
-                    label, soc))
-        # are there duplicate variables?
-        for var in ds.variables:
-            if var.id in varids:
-                args.log.error('duplicate variable ID: {0}'.format(var.id))
-            varids[var.id] = [c.code for c in var.codes] if var.type in ['Categorical', 'Ordinal'] else []
-
-        # are there undefined variables?
-        undefined = set([r.var_id for r in ds.data if r.var_id not in varids])
-        for u in undefined:
-            args.log.error('undefined variable ID: {0}'.format(u))
-
-        for d in ds.data:
-            if d.var_id not in varids:
-                args.log.error('undefined variable ID: {0}'.format(d.var_id))
-            elif len(varids[d.var_id]) > 1 and d.code not in varids[d.var_id]:
-                args.log.error('undefined code for variable {0} and society {1}:{2}'.format(d.var_id, d.soc_id, d.code))
-            for ref in d.references:
-                if ref.key not in sources:
-                    args.log.error('undefined source key "{0}" referenced in {1}'.format(
-                        ref.key, ds.id))
-
-    for gc, xs in gcs.items():
-        if len(xs) > 1:
-            args.log.debug('Glottocode {0} mapped to multiple xd_ids {1}'.format(gc, xs))
-
-    for xdid, glottocodes in xdids.items():
-        if len(glottocodes - {None}) > 1:
-            # No xd_id can be linked to more than one Glottocode!
-            args.log.error('xd_id {0} mapped to multiple glottocodes {1}'.format(xdid, glottocodes))
-            raise ValueError
-
-    for p in args.repos.phylogenies:
-        for taxon in p.taxa:
-            if taxon.glottocode and taxon.glottocode not in glottolog:
-                args.log.error('{0}: invalid glottocode {1}'.format(p.id, taxon.glottocode))
-            for socid in taxon.soc_ids:
-                if socid not in socids:
-                    args.log.error('{0}: invalid soc_id {1}'.format(p.id, socid))
-            for xdid in taxon.xd_ids:
-                if xdid not in xdids:
-                    args.log.error('{0}: invalid xd_id {1}'.format(p.id, xdid))
-
-        if not p.nexus:
-            args.log.error('{0}: unable to load summary.trees'.format(p.id))
-
-        try:
-            Tree(p.newick, format=1)
-        except NewickError as e:
-            args.log.error('{0}: invalid newick tree from summary.trees: {1}'.format(p.id, e))
+    args.repos.check()
 
 
 @command(name='glottolog')

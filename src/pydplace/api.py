@@ -1,5 +1,6 @@
 import re
 from itertools import groupby, chain
+import collections
 
 import attr
 from csvw.dsv import UnicodeWriter
@@ -11,6 +12,8 @@ from clldutils.attrlib import valid_re, valid_range
 from clldutils import jsonlib
 from nexus import NexusReader
 from pyglottolog.references import BibFile
+from ete3 import Tree
+from ete3.parser.newick import NewickError
 
 from pydplace.util import comma_split, semicolon_split, comma_join, semicolon_join, format_float
 
@@ -395,3 +398,86 @@ class Repos(API):
                     if societies and record.soc_id not in societies:
                         continue
                     yield record
+
+    def check(self):
+        glottolog = {l.id: l for l in
+                     self.read_csv('csv', 'glottolog.csv', namedtuples=True)}
+        msgs = {'error': [], 'warning': []}
+
+        def _msg(type_, msg, obj=None):  # pragma: no cover
+            obj = '{0.__class__.__name__} {0.id}: '.format(obj) if obj else ''
+            msgs[type_].append('%s:%s%s' % (type_.upper(), obj, msg))
+
+        def error(msg, obj=None):  # pragma: no cover
+            _msg('error', msg, obj=obj)
+
+        def warning(msg, obj=None):  # pragma: no cover
+            _msg('warning', msg, obj=obj)
+
+        sources = set(e.key for e in self.sources.iterentries())
+        socids, xdids, gcs, varids = \
+            set(), collections.defaultdict(set), collections.defaultdict(set), {}
+        for ds in self.datasets:
+            for soc in ds.societies:
+                if soc.id in socids:
+                    error('duplicate society ID: {0}'.format(soc.id), ds)
+                xdids[soc.xd_id].add(soc.glottocode)
+                gcs[soc.glottocode].add(soc.xd_id)
+                socids.add(soc.id)
+                if soc.glottocode not in glottolog:
+                    warning('{0} without valid glottocode {0.glottocode}'.format(soc), ds)
+                elif glottolog[soc.glottocode].family_name == 'Bookkeeping':
+                    warning('{0} mapped to Bookkeeping language: {0.glottocode}'.format(soc), ds)
+            # are there duplicate variables?
+            for var in ds.variables:
+                if var.id in varids:
+                    error('duplicate variable ID: {0}'.format(var.id), ds)
+                varids[var.id] = [c.code for c in var.codes] if var.type in ['Categorical', 'Ordinal'] else []
+
+            # are there undefined variables?
+            undefined = set([r.var_id for r in ds.data if r.var_id not in varids])
+            for u in undefined:
+                error('undefined variable ID: {0}'.format(u), ds)
+
+            for d in ds.data:
+                if d.var_id not in varids:
+                    error('undefined variable ID: {0}'.format(d.var_id), ds)
+                elif len(varids[d.var_id]) > 1 and d.code not in varids[d.var_id]:
+                    error('undefined code for variable {0} and society {1}:{2}'.format(d.var_id, d.soc_id, d.code), ds)
+                for ref in d.references:
+                    if ref.key not in sources:
+                        error('undefined source key "{0}" referenced in {1}'.format(
+                            ref.key, ds.id), ds)
+
+        #for gc, xs in gcs.items():
+        #    if len(xs) > 1:
+        #        print('Glottocode {0} mapped to multiple xd_ids {1}'.format(gc, xs))
+
+        for xdid, glottocodes in xdids.items():
+            if len(glottocodes - {None}) > 1:
+                # No xd_id can be linked to more than one Glottocode!
+                error('xd_id {0} mapped to multiple glottocodes {1}'.format(xdid, glottocodes))
+
+        for p in self.phylogenies:
+            for taxon in p.taxa:
+                if taxon.glottocode and taxon.glottocode not in glottolog:
+                    error('{0}: invalid glottocode {1}'.format(p.id, taxon.glottocode), p)
+                for socid in taxon.soc_ids:
+                    if socid not in socids:
+                        error('{0}: invalid soc_id {1}'.format(p.id, socid), p)
+                for xdid in taxon.xd_ids:
+                    if xdid not in xdids:
+                        error('{0}: invalid xd_id {1}'.format(p.id, xdid), p)
+
+            if not p.nexus:
+                error('{0}: unable to load summary.trees'.format(p.id), p)
+
+            try:
+                Tree(p.newick, format=1)
+            except NewickError as e:
+                error('{0}: invalid newick tree from summary.trees: {1}'.format(p.id, e), p)
+
+        for key in ['warning', 'error']:
+            for msg in msgs[key]:
+                print(msg)
+        return not bool(msgs['error'])

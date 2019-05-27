@@ -304,6 +304,18 @@ class Taxon(object):
     xd_ids = attr.ib(converter=comma_split)
     soc_ids = attr.ib(converter=comma_split)
     isocode = attr.ib(default=None)
+    properties = attr.ib(default=dict)
+
+    @classmethod
+    def from_dict(cls, d):
+        kw = {'properties': {}}
+        fields = set(f.name for f in attr.fields(cls))
+        for k, v in d.items():
+            if k in fields:
+                kw[k] = v
+            else:
+                kw['properties'][k] = v
+        return cls(**kw)
 
 
 @attr.s
@@ -334,7 +346,7 @@ class Phylogeny(ObjectWithSource):
 
     @property
     def taxa(self):
-        return [Taxon(**d) for d in reader(self.dir.joinpath('taxa.csv'), dicts=True)]
+        return [Taxon.from_dict(d) for d in reader(self.dir.joinpath('taxa.csv'), dicts=True)]
 
 
 class Repos(API):

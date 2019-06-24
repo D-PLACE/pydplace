@@ -7,7 +7,11 @@ from itertools import groupby
 from csvw.dsv import UnicodeWriter, reader
 from ete3 import Tree
 from pyglottolog.api import Glottolog
-from pyglottolog.languoids import Level
+try:
+    # Compatibility with pyglottolog < 2.x
+    from pyglottolog.languoids import Level
+except ImportError:
+    Level = None
 
 from pydplace.util import comma_join, remove_subdirs
 
@@ -129,15 +133,18 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
             writer.writerow([spec[k] for k in header])
 
 
-def languoids(langs, outdir):
+def languoids(api, langs, outdir):
+    _Level = Level or api.languoid_levels
     with UnicodeWriter(outdir / 'csv' / 'glottolog.csv') as writer:
-        writer.writerow(['id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id', 'macroarea', 'lineage', 'level'])
+        writer.writerow([
+            'id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id', 'macroarea',
+            'lineage', 'level'])
         for lang in sorted(langs, key=lambda l: l.id):
-            if lang.level == Level.language:
+            if lang.level == _Level.language:
                 lid = lang.id
-            elif lang.level == Level.dialect:
+            elif lang.level == _Level.dialect:
                 for _, lid, level in reversed(lang.lineage):
-                    if level == Level.language:
+                    if level == _Level.language:
                         break
                 else:
                     raise ValueError
@@ -150,7 +157,8 @@ def languoids(langs, outdir):
                 lang.lineage[0][0] if lang.lineage else '',
                 lang.iso or '',
                 lid,
-                lang.macroareas[0].value if lang.macroareas else '',
+                getattr(lang.macroareas[0], 'value', lang.macroareas[0].name)
+                if lang.macroareas else '',
                 '/'.join(gc for _, gc, _ in lang.lineage),
                 lang.level.name,
             ])
@@ -161,6 +169,7 @@ def update(repos, gl_repos, year, title):
         gc: list(socs) for gc, socs in groupby(
             sorted(repos.societies.values(), key=lambda s: s.glottocode),
             lambda s: s.glottocode)}
-    langs = list(Glottolog(gl_repos).languoids())
-    languoids(langs, repos.repos)
+    api = Glottolog(gl_repos)
+    langs = list(api.languoids())
+    languoids(api, langs, repos.repos)
     trees(societies_by_glottocode, langs, repos.repos, year, title)

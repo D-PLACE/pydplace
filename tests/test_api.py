@@ -1,9 +1,5 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-
 import pytest
 import attr
-from clldutils.path import read_text
 
 from pydplace.api import *
 
@@ -20,7 +16,7 @@ def test_datasets(repos):
     ds.societies[0].Comment = '__test__'
     ds.write()
     # Make sure the altered attribute is persisted:
-    assert '__test__' in read_text(ds._path('societies'))
+    assert '__test__' in ds._path('societies').read_text(encoding='utf-8')
 
     for d in ds.data:
         assert len(d.references) == 7

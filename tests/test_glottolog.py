@@ -1,4 +1,4 @@
-from clldutils.path import Path
+from pathlib import Path
 
 from pydplace.glottolog import *
 

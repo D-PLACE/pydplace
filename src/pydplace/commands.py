@@ -1,11 +1,10 @@
 from datetime import date
 from pathlib import Path
 
+from csvw.dsv import UnicodeWriter
 from clldutils.clilib import command, ParserError
-from clldutils.path import write_text
 from clldutils.markup import Table
 from clldutils.jsonlib import update_ordered
-from clldutils.dsv import UnicodeWriter
 from clldutils.apilib import assert_release
 
 from pydplace import geo
@@ -24,7 +23,7 @@ def readme(args):
                     '[{0}]({1}/{2})'.format(obj.name, datatype, obj.id),
                     obj.reference])
         md.append(t.render(condensed=False))
-    write_text(args.repos.path('SOURCES.md'), '\n'.join(md))
+    args.repos.path('SOURCES.md').write_text('\n'.join(md), encoding='utf-8')
 
 
 @command()

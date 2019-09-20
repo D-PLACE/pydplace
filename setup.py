@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pydplace',
-    version='2.1.3.dev0',
+    version='2.2.0',
     license='Apache 2.0',
     description='programmatic access to D-PLACE/dplace-data',
     long_description=open('README.md').read(),
@@ -16,7 +16,7 @@ setup(
     ],
     author='Robert Forkel',
     author_email='forkel@shh.mpg.de',
-    url='https://d-place.shh.mpg.de',
+    url='https://d-place.org',
     keywords='data',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},

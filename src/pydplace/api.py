@@ -5,8 +5,7 @@ import collections
 import attr
 from csvw.dsv import UnicodeWriter
 from csvw.dsv import reader as base_reader
-from clldutils.path import read_text
-from clldutils.misc import UnicodeMixin, lazyproperty
+from clldutils.misc import lazyproperty
 from clldutils.apilib import API
 from clldutils.attrlib import valid_re, valid_range
 from clldutils import jsonlib
@@ -80,11 +79,11 @@ class Code(Object):
 
 
 @attr.s
-class Reference(UnicodeMixin):
+class Reference(object):
     key = attr.ib()
     pages = attr.ib()
 
-    def __unicode__(self):
+    def __str__(self):
         res = self.key
         if self.pages:
             res += ':{0}'.format(self.pages)
@@ -129,7 +128,7 @@ class Data(Object):
 
 
 @attr.s
-class ObjectWithSource(UnicodeMixin):
+class ObjectWithSource(object):
     id = attr.ib()
     name = attr.ib()
     year = attr.ib()
@@ -142,17 +141,17 @@ class ObjectWithSource(UnicodeMixin):
     def dir(self):
         return self.base_dir.joinpath(self.id)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0.name} ({0.id})'.format(self)
 
 
 @attr.s
-class RelatedSociety(UnicodeMixin):
+class RelatedSociety(object):
     dataset = attr.ib(converter=lambda s: s.strip())
     name = attr.ib(converter=lambda s: s.strip())
     id = attr.ib(converter=lambda s: s.strip())
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0.dataset}: {0.name} [{0.id}]'.format(self)
 
     @classmethod
@@ -174,7 +173,7 @@ class RelatedSocieties(Object):
 
 
 @attr.s
-class HRAF(UnicodeMixin):
+class HRAF(object):
     name = attr.ib()
     id = attr.ib()
 
@@ -185,7 +184,7 @@ class HRAF(UnicodeMixin):
             assert id_.endswith(')')
             return cls(name.strip(), id_[:-1])
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0.name} ({0.id})'.format(self)
 
     @property
@@ -194,7 +193,7 @@ class HRAF(UnicodeMixin):
 
 
 @attr.s
-class Society(UnicodeMixin, Object):
+class Society(Object):
     id = attr.ib(validator=valid_re('[A-Za-z][A-Za-z0-9]+'))
     xd_id = attr.ib(validator=valid_re('xd[0-9]+'))
     pref_name_for_society = attr.ib()
@@ -215,7 +214,7 @@ class Society(UnicodeMixin, Object):
     Comment = attr.ib()
     glottocode_comment = attr.ib()
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0.pref_name_for_society} ({0.id})'.format(self)
 
     def astuple(self):
@@ -359,7 +358,7 @@ class Repos(API):
             if not ds.description:
                 readme = ds.base_dir / ds.id / 'README.md'
                 if readme.exists():
-                    ds.description = read_text(readme)
+                    ds.description = readme.read_text(encoding='utf-8')
         return res
 
     @lazyproperty
@@ -444,7 +443,8 @@ class Repos(API):
             for var in ds.variables:
                 if var.id in varids:
                     error('duplicate variable ID: {0}'.format(var.id), ds)
-                varids[var.id] = [c.code for c in var.codes] if var.type in ['Categorical', 'Ordinal'] else []
+                varids[var.id] = [
+                    c.code for c in var.codes] if var.type in ['Categorical', 'Ordinal'] else []
 
             # are there undefined variables?
             undefined = set([r.var_id for r in ds.data if r.var_id not in varids])
@@ -455,15 +455,12 @@ class Repos(API):
                 if d.var_id not in varids:
                     error('undefined variable ID: {0}'.format(d.var_id), ds)
                 elif len(varids[d.var_id]) > 1 and d.code not in varids[d.var_id]:
-                    error('undefined code for variable {0} and society {1}:{2}'.format(d.var_id, d.soc_id, d.code), ds)
+                    error('undefined code for variable {0} and society {1}:{2}'.format(
+                        d.var_id, d.soc_id, d.code), ds)
                 for ref in d.references:
                     if ref.key not in sources:
                         error('undefined source key "{0}" referenced in {1}'.format(
                             ref.key, ds.id), ds)
-
-        #for gc, xs in gcs.items():
-        #    if len(xs) > 1:
-        #        print('Glottocode {0} mapped to multiple xd_ids {1}'.format(gc, xs))
 
         for xdid, glottocodes in xdids.items():
             if len(glottocodes - {None}) > 1:

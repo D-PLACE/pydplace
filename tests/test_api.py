@@ -4,6 +4,15 @@ import attr
 from pydplace.api import *
 
 
+def test_reader(tmpdir):
+    from pydplace.api import reader
+
+    tmpdir.join('test').write_text('a,b\n1,2,3', encoding='utf8')
+
+    with pytest.raises(ValueError):
+        list(reader(str(tmpdir.join('test')), dicts=True))
+
+
 def test_datasets(repos):
     assert len(repos.datasets) == 1
     assert len(repos.phylogenies) == 2
@@ -11,6 +20,8 @@ def test_datasets(repos):
     assert len(repos.variables) == 40
 
     ds = repos.dataset('Binford')
+    with pytest.raises(KeyError):
+        ds.society('xyz')
     assert '{0}'.format(ds) == 'Binford Hunter-Gatherer (Binford)'
     assert len(ds.society_relations) == 339
     ds.societies[0].Comment = '__test__'
@@ -26,9 +37,15 @@ def test_datasets(repos):
     phy = repos.phylogenies[0]
     assert 'ket:' in phy.newick
     assert len(phy.taxa) == 40
+    assert not phy.is_glottolog
 
     assert len(list(
         repos.iter_data(datasets=['Binford'], societies=['B350'], variables=['B001']))) == 1
+
+    repos.write()
+    assert len(Repos(repos.repos).societies) == 339
+
+    assert isinstance(repos.read_json('geo', 'societies_tdwg.json'), dict)
 
 
 @pytest.fixture
@@ -63,3 +80,18 @@ def test_Reference():
     ref = Reference('meier2001', '10-15')
     assert '{0}'.format(ref) == 'meier2001:10-15'
     assert ref == Reference.from_string('meier2001[10-15]')
+
+
+def test_RelatedSociety():
+    with pytest.raises(ValueError):
+        RelatedSociety.from_string('x')
+    assert RelatedSociety.from_string('Dataset: name [id]').id == 'id'
+
+
+def test_Taxon():
+    t = Taxon.from_dict(dict(taxon='t', glottocode='g', xd_ids='a,b', soc_ids='', x='y'))
+    assert t.properties['x'] == 'y'
+
+
+def test_HRAF():
+    assert 'xyz' in HRAF.fromstring('Name (xyz)').url

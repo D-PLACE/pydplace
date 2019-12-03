@@ -1,5 +1,5 @@
 import re
-from itertools import groupby, chain
+import itertools
 import collections
 
 import attr
@@ -16,8 +16,8 @@ from ete3.parser.newick import NewickError
 
 from pydplace.util import comma_split, semicolon_split, comma_join, semicolon_join, format_float
 
-__all__ = ['Variable', 'Reference', 'Data', 'Society', 'Dataset',
-           'Taxon', 'Phylogeny', 'Repos']
+__all__ = ['Variable', 'Reference', 'Data', 'Society', 'RelatedSociety', 'Dataset',
+           'Taxon', 'Phylogeny', 'Repos', 'HRAF']
 
 ID_PATTERN = re.compile('[A-Za-z]+([0-9]+)?')
 
@@ -279,7 +279,7 @@ class Dataset(ObjectWithSource):
 
     @lazyproperty
     def variables(self):
-        codes = {vid: list(c) for vid, c in groupby(
+        codes = {vid: list(c) for vid, c in itertools.groupby(
             sorted(self._read_items('codes', dicts=True), key=lambda c: c['var_id']),
             lambda c: c['var_id'])}
         res = []
@@ -292,7 +292,8 @@ class Dataset(ObjectWithSource):
         self._write_items('societies')
         self._write_items('data')
         self._write_items('variables')
-        self._write_items('codes', items=list(chain(*[var.codes for var in self.variables])))
+        self._write_items('codes', items=list(
+            itertools.chain(*[var.codes for var in self.variables])))
         self._write_items('societies_mapping', attr='society_relations')
 
 
@@ -377,13 +378,13 @@ class Repos(API):
     @property
     def societies(self):
         return {
-            s.id: s for s in chain.from_iterable(d.societies for d in self.datasets)
+            s.id: s for s in itertools.chain.from_iterable(d.societies for d in self.datasets)
         }
 
     @property
     def variables(self):
         return {
-            v.id: v for v in chain.from_iterable(d.variables for d in self.datasets)
+            v.id: v for v in itertools.chain.from_iterable(d.variables for d in self.datasets)
         }
 
     @property
@@ -430,31 +431,32 @@ class Repos(API):
             set(), collections.defaultdict(set), collections.defaultdict(set), {}
         for ds in self.datasets:
             for soc in ds.societies:
-                if soc.id in socids:
+                if soc.id in socids:  # pragma: no cover
                     error('duplicate society ID: {0}'.format(soc.id), ds)
                 xdids[soc.xd_id].add(soc.glottocode)
                 gcs[soc.glottocode].add(soc.xd_id)
                 socids.add(soc.id)
-                if soc.glottocode not in glottolog:
+                if soc.glottocode not in glottolog:  # pragma: no cover
                     warning('{0} without valid glottocode {0.glottocode}'.format(soc), ds)
-                elif glottolog[soc.glottocode].family_name == 'Bookkeeping':
+                elif glottolog[soc.glottocode].family_name == 'Bookkeeping':  # pragma: no cover
                     warning('{0} mapped to Bookkeeping language: {0.glottocode}'.format(soc), ds)
             # are there duplicate variables?
             for var in ds.variables:
-                if var.id in varids:
+                if var.id in varids:  # pragma: no cover
                     error('duplicate variable ID: {0}'.format(var.id), ds)
                 varids[var.id] = [
                     c.code for c in var.codes] if var.type in ['Categorical', 'Ordinal'] else []
 
             # are there undefined variables?
             undefined = set([r.var_id for r in ds.data if r.var_id not in varids])
-            for u in undefined:
+            for u in undefined:  # pragma: no cover
                 error('undefined variable ID: {0}'.format(u), ds)
 
             for d in ds.data:
-                if d.var_id not in varids:
+                if d.var_id not in varids:  # pragma: no cover
                     error('undefined variable ID: {0}'.format(d.var_id), ds)
-                elif len(varids[d.var_id]) > 1 and d.code not in varids[d.var_id]:
+                elif len(varids[d.var_id]) > 1 \
+                        and d.code not in varids[d.var_id]:  # pragma: no cover
                     error('undefined code for variable {0} and society {1}:{2}'.format(
                         d.var_id, d.soc_id, d.code), ds)
                 for ref in d.references:
@@ -463,7 +465,7 @@ class Repos(API):
                             ref.key, ds.id), ds)
 
         for xdid, glottocodes in xdids.items():
-            if len(glottocodes - {None}) > 1:
+            if len(glottocodes - {None}) > 1:  # pragma: no cover
                 # No xd_id can be linked to more than one Glottocode!
                 error('xd_id {0} mapped to multiple glottocodes {1}'.format(xdid, glottocodes))
 
@@ -478,12 +480,12 @@ class Repos(API):
                     if xdid not in xdids:
                         error('{0}: invalid xd_id {1}'.format(p.id, xdid), p)
 
-            if not p.nexus:
+            if not p.nexus:  # pragma: no cover
                 error('{0}: unable to load summary.trees'.format(p.id), p)
 
             try:
                 Tree(p.newick, format=1)
-            except NewickError as e:
+            except NewickError as e:  # pragma: no cover
                 error('{0}: invalid newick tree from summary.trees: {1}'.format(p.id, e), p)
 
         for key in ['warning', 'error']:

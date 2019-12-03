@@ -4,7 +4,7 @@ import pytest
 
 try:
     from shapely.geometry import shape
-except ImportError:
+except ImportError:  # pragma: no cover
     shape = None
 
 from pydplace import geo

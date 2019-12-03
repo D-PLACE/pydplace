@@ -1,15 +1,15 @@
-from functools import partial
 import types
 import shutil
-from pathlib import Path
+import pathlib
+import functools
 
 from clldutils.text import split_text
 
 __all__ = ['comma_split', 'semicolon_split', 'remove_subdirs', 'comma_join']
 
 
-comma_split = partial(split_text, separators=',', strip=True, brackets={})
-semicolon_split = partial(split_text, separators=';', strip=True, brackets={})
+comma_split = functools.partial(split_text, separators=',', strip=True, brackets={})
+semicolon_split = functools.partial(split_text, separators=';', strip=True, brackets={})
 
 
 def _join(sep, *args):
@@ -18,8 +18,8 @@ def _join(sep, *args):
     return sep.join(args)
 
 
-comma_join = partial(_join, ', ')
-semicolon_join = partial(_join, '; ')
+comma_join = functools.partial(_join, ', ')
+semicolon_join = functools.partial(_join, '; ')
 
 
 def format_float(f):
@@ -27,6 +27,6 @@ def format_float(f):
 
 
 def remove_subdirs(d, pattern='*'):
-    for sd in Path(d).glob(pattern):
+    for sd in pathlib.Path(d).glob(pattern):
         if sd.is_dir():
             shutil.rmtree(str(sd))

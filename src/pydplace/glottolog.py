@@ -2,7 +2,7 @@
 Recreate glottolog data files from the current version published at http://glottolog.org
 """
 import re
-from itertools import groupby
+import itertools
 
 from csvw.dsv import UnicodeWriter, reader
 from ete3 import Tree
@@ -82,7 +82,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
         taxa_in_tree = set(n.name for n in node.walk())
         taxa_in_dplace = glottocodes.intersection(taxa_in_tree)
         if not taxa_in_dplace:
-            continue
+            continue  # pragma: no cover
 
         tree = Tree("({0});".format(node.newick), format=3)
         tree.name = 'glottolog_{0}'.format(family.id)
@@ -146,7 +146,7 @@ def languoids(api, langs, outdir):
                 for _, lid, level in reversed(lang.lineage):
                     if level == _Level.language:
                         break
-                else:
+                else:  # pragma: no cover
                     raise ValueError
             else:
                 lid = None
@@ -166,7 +166,7 @@ def languoids(api, langs, outdir):
 
 def update(repos, gl_repos, year, title):
     societies_by_glottocode = {
-        gc: list(socs) for gc, socs in groupby(
+        gc: list(socs) for gc, socs in itertools.groupby(
             sorted(repos.societies.values(), key=lambda s: s.glottocode),
             lambda s: s.glottocode)}
     api = Glottolog(gl_repos)

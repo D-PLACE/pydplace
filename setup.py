@@ -26,9 +26,10 @@ setup(
     python_requires='>=3.5',
     install_requires=[
         'attrs>=18.1',
-        'clldutils>=2.7.0',
-        'csvw>=1.4.2',
-        'pyglottolog>=1.2.1',
+        'clldutils>=3.5.0',
+        'cldfcatalog',
+        'csvw>=1.6',
+        'pyglottolog>=3.0',
         'python-nexus>=1.63',
         'pycldf>=1.0.6',
         'ete3>=3.0.0b34',

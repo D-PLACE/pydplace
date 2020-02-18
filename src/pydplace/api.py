@@ -10,6 +10,7 @@ from clldutils.apilib import API
 from clldutils.attrlib import valid_re, valid_range
 from clldutils import jsonlib
 from nexus import NexusReader
+from newick import loads as newick_loads
 from pyglottolog.references import BibFile
 from ete3 import Tree
 from ete3.parser.newick import NewickError
@@ -337,6 +338,10 @@ class Phylogeny(ObjectWithSource):
             return newick
 
     @property
+    def newick_tree(self):
+        return newick_loads(self.newick)[0]
+
+    @property
     def is_glottolog(self):
         return self.id.startswith('glottolog_')
 
@@ -470,7 +475,9 @@ class Repos(API):
                 error('xd_id {0} mapped to multiple glottocodes {1}'.format(xdid, glottocodes))
 
         for p in self.phylogenies:
+            taxa = set()
             for taxon in p.taxa:
+                taxa.add(taxon.taxon)
                 if taxon.glottocode and taxon.glottocode not in glottolog:
                     error('{0}: invalid glottocode {1}'.format(p.id, taxon.glottocode), p)
                 for socid in taxon.soc_ids:
@@ -487,6 +494,11 @@ class Repos(API):
                 Tree(p.newick, format=1)
             except NewickError as e:  # pragma: no cover
                 error('{0}: invalid newick tree from summary.trees: {1}'.format(p.id, e), p)
+
+            if not p.is_glottolog:
+                for node in p.newick_tree.walk():
+                    if node.name and node.is_leaf and node.name not in taxa:
+                        warning('Leaf label missing in taxa.csv: {0}'.format(node.name), obj=p)
 
         for key in ['warning', 'error']:
             for msg in msgs[key]:

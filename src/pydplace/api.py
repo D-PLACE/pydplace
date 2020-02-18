@@ -394,7 +394,7 @@ class Repos(API):
 
     @property
     def sources(self):
-        return BibFile(self.path('datasets', 'sources.bib'))
+        return BibFile(self.path('sources.bib'))
 
     def write(self):
         for ds in self.datasets:

@@ -322,6 +322,7 @@ class Taxon(object):
 @attr.s
 class Phylogeny(ObjectWithSource):
     scaling = attr.ib()
+    source_id = attr.ib()
 
     @property
     def nexus(self):
@@ -394,7 +395,7 @@ class Repos(API):
 
     @property
     def sources(self):
-        return BibFile(self.path('datasets', 'sources.bib'))
+        return BibFile(self.path('sources.bib'))
 
     def write(self):
         for ds in self.datasets:
@@ -475,6 +476,9 @@ class Repos(API):
                 error('xd_id {0} mapped to multiple glottocodes {1}'.format(xdid, glottocodes))
 
         for p in self.phylogenies:
+            if p.source_id:
+                if p.source_id not in sources:
+                    error('{0}: invalid source_id {1}'.format(p.id, p.source_id), p)
             taxa = set()
             for taxon in p.taxa:
                 taxa.add(taxon.taxon)

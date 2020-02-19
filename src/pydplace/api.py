@@ -477,7 +477,7 @@ class Repos(API):
 
         for p in self.phylogenies:
             if p.source_id:
-                if p.source_id not in sources:
+                if p.source_id not in sources:  # pragma: no cover
                     error('{0}: invalid source_id {1}'.format(p.id, p.source_id), p)
             taxa = set()
             for taxon in p.taxa:
@@ -501,7 +501,7 @@ class Repos(API):
 
             if not p.is_glottolog:
                 for node in p.newick_tree.walk():
-                    if node.name and node.is_leaf and node.name not in taxa:
+                    if node.name and node.is_leaf and node.name not in taxa:  # pragma: no cover
                         warning('Leaf label missing in taxa.csv: {0}'.format(node.name), obj=p)
 
         for key in ['warning', 'error']:

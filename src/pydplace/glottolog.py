@@ -124,13 +124,13 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
         writer.writerow(header)
         for phylo in sorted(phylos, key=lambda p: tuple(p.values())):
             if phylo['id'] in index:
-                writer.writerow([index[phylo['id']][k] for k in header])
+                writer.writerow([index[phylo['id']].get(k, '') for k in header])
                 del index[phylo['id']]
             else:
                 writer.writerow(list(phylo.values()))
 
         for id_, spec in sorted(index.items()):
-            writer.writerow([spec[k] for k in header])
+            writer.writerow([spec.get(k, '') for k in header])
 
 
 def languoids(api, langs, outdir):

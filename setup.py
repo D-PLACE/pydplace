@@ -31,7 +31,7 @@ setup(
         'csvw>=1.6',
         'pyglottolog>=3.0',
         'python-nexus>=1.63',
-        'pycldf>=1.0.6',
+        'pycldf>=1.14',
         'ete3>=3.0.0b34',
         #'pygdal>=1.11.3.3',
         #'fiona',
@@ -41,7 +41,7 @@ setup(
         'dev': ['flake8', 'wheel', 'twine'],
         'test': [
             'mock',
-            'pytest>=3.6',
+            'pytest>=5',
             'pytest-mock',
             'pytest-cov',
             'coverage>=4.2',

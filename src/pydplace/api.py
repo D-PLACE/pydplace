@@ -46,6 +46,7 @@ class Variable(Object):
     category = attr.ib(converter=comma_split)
     title = attr.ib()
     definition = attr.ib()
+
     type = attr.ib(validator=attr.validators.in_(['Continuous', 'Categorical', 'Ordinal']))
     units = attr.ib()
     source = attr.ib()
@@ -88,6 +89,12 @@ class Reference(object):
         res = self.key
         if self.pages:
             res += ':{0}'.format(self.pages)
+        return res
+
+    def format_cldf(self):
+        res = self.key
+        if self.pages:
+            res += '[{}]'.format(self.pages)
         return res
 
     @classmethod
@@ -151,6 +158,10 @@ class RelatedSociety(object):
     dataset = attr.ib(converter=lambda s: s.strip())
     name = attr.ib(converter=lambda s: s.strip())
     id = attr.ib(converter=lambda s: s.strip())
+
+    def __attrs_post_init__(self):
+        if self.dataset == 'WNAI' and self.id.startswith('J'):
+            self.id = self.id.replace('J', 'WNAI')
 
     def __str__(self):
         return '{0.dataset}: {0.name} [{0.id}]'.format(self)

@@ -1,10 +1,12 @@
 """
 
 """
+import sys
+import shutil
 import collections
 
 from clldutils.clilib import PathType
-from cldfcatalog import Catalog
+from cldfcatalog import Catalog, Repository
 from pycldf import StructureDataset, Sources
 
 
@@ -16,23 +18,59 @@ def register(parser):
         type=PathType(type='dir'),
     )
     parser.add_argument(
-        '--glottolog-version',
-        default=None,
+        'glottolog_version',
         help="tag to checkout glottolog/glottolog to",
     )
-    parser.add_argument('--dev', action='store_true', default=False)
     parser.add_argument(
         '--cldf_repos',
         help="clone of d-place/dplace-cldf",
         default='../dplace-cldf',
         type=PathType(type='dir'))
+    parser.add_argument('--dev', action='store_true', default=False)
+    parser.add_argument('--fix-code-id', action='store_true', default=False)
 
 
 def run(args):
-    from csvw.metadata import Column
-    #with Catalog(args.glottolog, args.glottolog_version) as glottolog:
-    #    (args.repos, glottolog.dir, args.cldf_repos)
     cldf = StructureDataset.in_dir(args.cldf_repos / 'cldf')
+    with Catalog(args.glottolog, args.glottolog_version) as glottolog:
+        write_metadata(cldf, args, glottolog)
+    write_schema(cldf)
+    cldf.write(**get_data(cldf, args))
+    shutil.copy(str(args.repos.path('LICENSE.txt')), args.cldf_repos)
+    if not args.dev:
+        cldf.validate(log=args.log)
+
+
+def write_metadata(cldf, args, glottolog):
+    cldf.properties['dc:bibliographicCitation'] = \
+        'Kathryn R. Kirby, Russell D. Gray, Simon J. Greenhill, Fiona M. Jordan, ' \
+        'Stephanie Gomes-Ng, Hans-Jörg Bibiko, Damián E. Blasi, Carlos A. Botero, ' \
+        'Claire Bowern, Carol R. Ember, Dan Leehr, Bobbi S. Low, Joe McCarter, ' \
+        'William Divale, and Michael C. Gavin. (2016). ' \
+        'D-PLACE: A Global Database of Cultural, Linguistic and Environmental Diversity. ' \
+        'PLoS ONE, 11(7): e0158391. doi:10.1371/journal.pone.0158391.'
+    cldf.properties['dc:title'] = 'CLDF Dataset derived from D-PLACE'
+    cldf.properties['dc:description'] = \
+        'This dataset contains the data from D-PLACE, ' \
+        'the Database of Places, Language, Culture and Environment, ' \
+        'serialized as CLDF StructureDataset. ' \
+        'D-PLACE societies are formally treated as languages, i.e. society metadata is ' \
+        'written to the CLDF LanguageTable and the data on language phylogenies ' \
+        'aggregated in D-PLACE is excluded.'
+    cldf.properties['dc:related'] = 'https://d-place.org'
+    cldf.properties['rdf:type'] = 'http://www.w3.org/ns/dcat#Distribution'
+    cldf.properties['dcat:accessURL'] = Repository(args.cldf_repos).url
+    cldf.add_provenance(wasDerivedFrom=[
+        Repository(args.repos.repos).json_ld(),
+        glottolog.json_ld(),
+    ])
+    cldf.add_provenance(wasGeneratedBy=[
+        collections.OrderedDict([
+            ('dc:title', "python"),
+            ('dc:description', sys.version.split()[0])])])
+
+
+def write_schema(cldf):
     cldf.add_component(
         'LanguageTable',
         'xd_id',
@@ -103,8 +141,8 @@ def run(args):
     cldf.add_foreign_key('LanguageTable', 'Dataset_ID', 'datasets.csv', 'ID')
     cldf.add_foreign_key('ValueTable', 'Dataset_ID', 'datasets.csv', 'ID')
 
-    # FIXME: add foreignkeys to datasets.csv!
 
+def get_data(cldf, args):
     relscount = 0
     cldf.sources = Sources.from_file(args.repos.path('sources.bib'))
     categorical_variables = set()
@@ -175,15 +213,21 @@ def run(args):
                     'Name': code.name,
                     'Description': code.description,
                 })
+
+        codes = set(c['ID'] for c in data['CodeTable'])
         for i, d in enumerate(ds.data, start=1):
+            code_id = None \
+                if (d.var_id not in categorical_variables) or d.code == 'NA' \
+                else '{}-{}'.format(d.var_id, d.code).replace('.', '_')
+            if code_id and (code_id not in codes) and args.fix_code_id:
+                code_id = None
+
             data['ValueTable'].append({
                 'ID': '{}-{}'.format(ds.id, i),
                 'Language_ID': d.soc_id,
                 'Parameter_ID': d.var_id.replace('.', '_'),
                 'Dataset_ID': ds.id,
-                'Code_ID': None
-                if (d.var_id not in categorical_variables) or d.code == 'NA'
-                else '{}-{}'.format(d.var_id, d.code).replace('.', '_'),
+                'Code_ID': code_id,
                 'Value': d.code,
                 'Comment': d.comment,
                 'Sub_Case': d.sub_case,
@@ -192,6 +236,4 @@ def run(args):
                 'Source_Coded_Data': d.source_coded_data,
                 'Admin_Comment': d.admin_comment,
             })
-    cldf.write(**data)
-    if not args.dev:
-        cldf.validate(log=args.log)
+    return data

@@ -12,6 +12,11 @@ import pytest
 from pydplace.__main__ import main
 
 
+@pytest.fixture
+def glottolog_repos():
+    return pathlib.Path(__file__).parent / 'gl_repos'
+
+
 def test_help(capsys):
     main([])
     out, _ = capsys.readouterr()
@@ -33,6 +38,15 @@ def test_check(repos):
     main(['--repos', str(repos.repos), 'check'])
 
 
+def test_cldf(repos, tmpdir, glottolog_repos):
+    main([
+        '--repos', str(repos.repos),
+        'cldf',
+        str(glottolog_repos),
+        'test',
+        '--cldf-repos', str(tmpdir)])
+
+
 def test_index(repos):
     assert not repos.path('SOURCES.md').exists()
     main(['--repos', str(repos.repos), 'index'])
@@ -45,9 +59,8 @@ def test_tdwg(repos):
     main(['--repos', str(repos.repos), 'tdwg'], log=logging.getLogger(__name__))
 
 
-def test_glottolog(repos):
-    main(
-        ['--repos', str(repos.repos), 'glottolog', str(pathlib.Path(__file__).parent / 'gl_repos')])
+def test_glottolog(repos, glottolog_repos):
+    main(['--repos', str(repos.repos), 'glottolog', str(glottolog_repos)])
 
 
 def test_extract(tmpdir, repos, mocker):

@@ -1,10 +1,11 @@
 """
-
+Serialize the core D-PLACE data (without the phylogenies) as CLDF StructureDataset.
 """
 import sys
 import shutil
 import collections
 
+from git import InvalidGitRepositoryError
 from clldutils.clilib import PathType
 from cldfcatalog import Catalog, Repository
 from pycldf import StructureDataset, Sources
@@ -22,7 +23,7 @@ def register(parser):
         help="tag to checkout glottolog/glottolog to",
     )
     parser.add_argument(
-        '--cldf_repos',
+        '--cldf-repos',
         help="clone of d-place/dplace-cldf",
         default='../dplace-cldf',
         type=PathType(type='dir'))
@@ -32,11 +33,14 @@ def register(parser):
 
 def run(args):
     cldf = StructureDataset.in_dir(args.cldf_repos / 'cldf')
-    with Catalog(args.glottolog, args.glottolog_version) as glottolog:
-        write_metadata(cldf, args, glottolog)
+    if args.glottolog_version != 'test':  # pragma: no cover
+        with Catalog(args.glottolog, args.glottolog_version) as glottolog:
+            write_metadata(cldf, args, glottolog)
+    else:
+        write_metadata(cldf, args, None)
     write_schema(cldf)
     cldf.write(**get_data(cldf, args))
-    shutil.copy(str(args.repos.path('LICENSE.txt')), args.cldf_repos)
+    shutil.copy(str(args.repos.path('LICENSE.txt')), str(args.cldf_repos))
     if not args.dev:
         cldf.validate(log=args.log)
 
@@ -59,11 +63,15 @@ def write_metadata(cldf, args, glottolog):
         'aggregated in D-PLACE is excluded.'
     cldf.properties['dc:related'] = 'https://d-place.org'
     cldf.properties['rdf:type'] = 'http://www.w3.org/ns/dcat#Distribution'
-    cldf.properties['dcat:accessURL'] = Repository(args.cldf_repos).url
-    cldf.add_provenance(wasDerivedFrom=[
-        Repository(args.repos.repos).json_ld(),
-        glottolog.json_ld(),
-    ])
+    try:  # pragma: no cover
+        cldf.properties['dcat:accessURL'] = Repository(args.cldf_repos).url
+    except InvalidGitRepositoryError:
+        pass
+    if glottolog:  # pragma: no cover
+        cldf.add_provenance(wasDerivedFrom=[
+            Repository(args.repos.repos).json_ld(),
+            glottolog.json_ld(),
+        ])
     cldf.add_provenance(wasGeneratedBy=[
         collections.OrderedDict([
             ('dc:title', "python"),

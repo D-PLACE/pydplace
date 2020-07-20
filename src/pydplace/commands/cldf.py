@@ -5,7 +5,6 @@ import sys
 import shutil
 import collections
 
-from git import InvalidGitRepositoryError
 from clldutils.clilib import PathType
 from cldfcatalog import Catalog, Repository
 from pycldf import StructureDataset, Sources
@@ -63,11 +62,8 @@ def write_metadata(cldf, args, glottolog):
         'aggregated in D-PLACE is excluded.'
     cldf.properties['dc:related'] = 'https://d-place.org'
     cldf.properties['rdf:type'] = 'http://www.w3.org/ns/dcat#Distribution'
-    try:  # pragma: no cover
-        cldf.properties['dcat:accessURL'] = Repository(args.cldf_repos).url
-    except InvalidGitRepositoryError:
-        pass
     if glottolog:  # pragma: no cover
+        cldf.properties['dcat:accessURL'] = Repository(args.cldf_repos).url
         cldf.add_provenance(wasDerivedFrom=[
             Repository(args.repos.repos).json_ld(),
             glottolog.json_ld(),

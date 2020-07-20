@@ -38,6 +38,10 @@ def test_check(repos):
     main(['--repos', str(repos.repos), 'check'])
 
 
+def test_glottologbib(repos):
+    main(['--repos', str(repos.repos), 'glottologbib'])
+
+
 def test_cldf(repos, tmpdir, glottolog_repos):
     main([
         '--repos', str(repos.repos),

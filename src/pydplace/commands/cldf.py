@@ -102,7 +102,8 @@ def write_schema(cldf):
         },
         {
             "name": "Type",
-            "datatype": {"base": "string", "format": "|".join(['Continuous', 'Categorical', 'Ordinal'])},
+            "datatype": {"base": "string", "format": "|".join(
+                ['Continuous', 'Categorical', 'Ordinal'])},
         },
         "Units",
         "Source",
@@ -130,7 +131,7 @@ def write_schema(cldf):
         {'name': 'Reference', 'propertyUrl': 'http://purl.org/dc/terms/bibliographicCitation'},
         'URL',
     )
-    t = cldf.add_table(
+    cldf.add_table(
         'society_relations.csv',
         {'name': 'ID', 'propertyUrl': 'http://cldf.clld.org/v1.0/terms.rdf#id'},
         'Society_ID',

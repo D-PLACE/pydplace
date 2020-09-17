@@ -4,7 +4,7 @@ import pathlib
 
 try:
     import fiona
-except ImportError:
+except ImportError:  # pragma: no cover
     fiona = None
 
 import pytest

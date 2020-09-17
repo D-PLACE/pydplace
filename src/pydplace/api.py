@@ -161,7 +161,7 @@ class RelatedSociety(object):
 
     def __attrs_post_init__(self):
         if self.dataset == 'WNAI' and self.id.startswith('J'):
-            self.id = self.id.replace('J', 'WNAI')
+            self.id = self.id.replace('J', 'WNAI')  # pragma: no cover
 
     def __str__(self):
         return '{0.dataset}: {0.name} [{0.id}]'.format(self)

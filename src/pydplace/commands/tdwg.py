@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 
 
 def run(args):
-    if fiona is None:
+    if fiona is None:  # pragma: no cover
         raise SystemExit('fiona and shapely must be installed for this command')
 
     with fiona.collection(str(args.repos.path("geo", "level2-shape/level2.shp")), "r") as source:

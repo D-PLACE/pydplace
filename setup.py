@@ -34,7 +34,10 @@ setup(
         'pyglottolog>=3.0',
         'python-nexus>=1.63',
         'pycldf>=1.14',
-        'ete3>=3.0.0b34',
+        # ete3 doesn't install its dependencies properly, so we have to:
+        'six',
+        'numpy',
+        'ete3>=3.1.2',
         #'pygdal>=1.11.3.3',
         #'fiona',
         #'shapely',
@@ -42,7 +45,6 @@ setup(
     extras_require={
         'dev': ['flake8', 'wheel', 'twine'],
         'test': [
-            'mock',
             'pytest>=5',
             'pytest-mock',
             'pytest-cov',

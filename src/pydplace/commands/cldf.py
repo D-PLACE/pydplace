@@ -225,7 +225,9 @@ def get_data(cldf, args):
                 if (d.var_id not in categorical_variables) or d.code == 'NA' \
                 else '{}-{}'.format(d.var_id, d.code).replace('.', '_')
             if code_id and (code_id not in codes) and args.fix_code_id:
-                code_id = None
+                # This is a backwards compatibility fix. New releases should not have references
+                # to undefined codes!
+                code_id = None  # pragma: no cover
 
             data['ValueTable'].append({
                 'ID': '{}-{}'.format(ds.id, i),

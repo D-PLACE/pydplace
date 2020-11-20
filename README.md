@@ -2,7 +2,7 @@
 
 A Python library to access [D-PLACE](https://d-place.org) data. 
 
-[![Build Status](https://travis-ci.org/D-PLACE/pydplace.svg?branch=master)](https://travis-ci.org/D-PLACE/pydplace)
+[![Build Status](https://github.com/D-PLACE/pydplace/workflows/tests/badge.svg)](https://github.com/D-PLACE/pydplace/actions?query=workflow%3Atests)
 [![codecov](https://codecov.io/gh/D-PLACE/pydplace/branch/master/graph/badge.svg)](https://codecov.io/gh/D-PLACE/pydplace)
 [![PyPI](https://img.shields.io/pypi/v/pydplace.svg)](https://pypi.org/project/pydplace)
 

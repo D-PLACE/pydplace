@@ -27,6 +27,8 @@ setup(
     platforms='any',
     python_requires='>=3.5',
     install_requires=[
+        'pybtex<0.23; python_version < "3.6"',
+        'pybtex; python_version > "3.5"',
         'attrs>=19.1',
         'clldutils>=3.5.0',
         'cldfcatalog',

@@ -20,7 +20,7 @@ from pydplace.util import comma_split, semicolon_split, comma_join, semicolon_jo
 __all__ = ['Variable', 'Reference', 'Data', 'Society', 'RelatedSociety', 'Dataset',
            'Taxon', 'Phylogeny', 'Repos', 'HRAF']
 
-ID_PATTERN = re.compile('[A-Za-z]+([0-9]+)?')
+ID_PATTERN = re.compile(r'[A-Za-z.0-9_]+([0-9]+)?')
 
 
 def reader(*args, **kw):

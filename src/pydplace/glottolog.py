@@ -54,7 +54,7 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
 
 
 def trees(societies_by_glottocode, langs, outdir, year, title):
-    label_pattern = re.compile("'[^\[]+\[([a-z0-9]{4}[0-9]{4})[^']*'")
+    label_pattern = re.compile(r"'[^\[]+\[([a-z0-9]{4}[0-9]{4})[^']*'")
 
     def rename(n):
         n.name = label_pattern.match(n.name).groups()[0]

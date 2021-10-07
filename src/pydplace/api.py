@@ -7,7 +7,7 @@ from csvw.dsv import UnicodeWriter
 from csvw.dsv import reader as base_reader
 from clldutils.misc import lazyproperty
 from clldutils.apilib import API
-from clldutils.attrlib import valid_re, valid_range
+from clldutils.attrlib import valid_range
 from clldutils import jsonlib
 from nexus import NexusReader
 from newick import loads as newick_loads
@@ -42,7 +42,7 @@ class Object(object):
 
 @attr.s
 class Variable(Object):
-    id = attr.ib(validator=valid_re(ID_PATTERN))
+    id = attr.ib(validator=attr.validators.matches_re(ID_PATTERN))
     category = attr.ib(converter=comma_split)
     title = attr.ib()
     definition = attr.ib()
@@ -74,7 +74,7 @@ class Variable(Object):
 
 @attr.s
 class Code(Object):
-    var_id = attr.ib(validator=valid_re(ID_PATTERN))
+    var_id = attr.ib(validator=attr.validators.matches_re(ID_PATTERN))
     code = attr.ib()
     description = attr.ib(converter=lambda s: s.strip())
     name = attr.ib()
@@ -168,7 +168,7 @@ class RelatedSociety(object):
 
     @classmethod
     def from_string(cls, s):
-        match = re.match('([A-Za-z]+):\s*([^\[]+)\[([^\]]+)\]$', s)
+        match = re.match(r'([A-Za-z]+):\s*([^\[]+)\[([^\]]+)\]$', s)
         if not match:
             raise ValueError(s)
         return cls(*match.groups())
@@ -201,24 +201,25 @@ class HRAF(object):
 
     @property
     def url(self):
-        return 'http://ehrafworldcultures\.yale\.edu/collection\?owc={0}'.format(self.id)
+        return 'http://ehrafworldcultures.yale.edu/collection?owc={0}'.format(self.id)
 
 
 @attr.s
 class Society(Object):
-    id = attr.ib(validator=valid_re('[A-Za-z][A-Za-z0-9]+'))
-    xd_id = attr.ib(validator=valid_re('xd[0-9]+'))
+    id = attr.ib(validator=attr.validators.matches_re('[A-Za-z][A-Za-z0-9]+'))
+    xd_id = attr.ib(validator=attr.validators.matches_re('xd[0-9]+'))
     pref_name_for_society = attr.ib()
-    glottocode = attr.ib(validator=valid_re('[a-z0-9]{4}[0-9]{4}$', nullable=True))
+    glottocode = attr.ib(
+        validator=attr.validators.optional(attr.validators.matches_re('[a-z0-9]{4}[0-9]{4}$')))
     ORIG_name_and_ID_in_this_dataset = attr.ib()
     alt_names_by_society = attr.ib(converter=comma_split)
     main_focal_year = attr.ib()
     HRAF_name_ID = attr.ib(converter=HRAF.fromstring)
     HRAF_link = attr.ib(
         converter=lambda s: s.strip() or None,
-        validator=valid_re(
+        validator=attr.validators.optional(attr.validators.matches_re(
             r'http://ehrafworldcultures\.yale\.edu/collection\?owc=[A-Z0-9]+|in process',
-            nullable=True))
+        )))
     origLat = attr.ib(converter=float)
     origLong = attr.ib(converter=float)
     Lat = attr.ib(converter=float, validator=valid_range(-90, 90))
@@ -429,7 +430,7 @@ class Repos(API):
                     yield record
 
     def check(self):
-        glottolog = {l.id: l for l in
+        glottolog = {lng.id: lng for lng in
                      self.read_csv('csv', 'glottolog.csv', namedtuples=True)}
         msgs = {'error': [], 'warning': []}
 

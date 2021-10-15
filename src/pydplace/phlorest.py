@@ -1,4 +1,5 @@
 import copy
+import gzip
 import uuid
 import shlex
 import shutil
@@ -88,6 +89,25 @@ class Dataset(cldfbench.Dataset):
     def cmd_download(self, args):
         pass
 
+    def read_gzipped_text(self, p):
+        with gzip.open(p) as fp:
+            return fp.read().decode('utf8')
+
+    def read_trees(self, p, detranslate=False):
+        nex = nexus.NexusReader(p)
+        if detranslate:
+            nex.trees.detranslate()
+        return nex.trees.trees
+
+    def read_tree(self, p, detranslate=False):
+        return self.read_trees(p, detranslate=detranslate)[0]
+
+    def nexus_summary(self):
+        return NexusFile(self.cldf_dir / 'summary.trees')
+
+    def nexus_posterior(self):
+        return NexusFile(self.cldf_dir / 'posterior.trees')
+
     def run_nexus(self, cmd, input):
         with tempfile.TemporaryDirectory() as d:
             d = pathlib.Path(d)
@@ -170,10 +190,15 @@ class Dataset(cldfbench.Dataset):
             },
         )
 
-    def add_tree(self, args, tree, nex, tid, type_, source=None):
+    def add_tree(self, args, tree, nex, tid, type_=None, source=None):
         if self._lids:
             check_tree(tree, self._lids, args.log)
         nex.append(tree)
+        if type_ is None:
+            if nex.path.stem == 'summary':
+                type_ = 'summary'
+            elif nex.path.stem == 'posterior':
+                type_ = 'sample'
 
         if source is None:
             bibkeys = list(args.writer.cldf.sources.keys())
@@ -213,11 +238,13 @@ class Dataset(cldfbench.Dataset):
         #
         for row in self.etc_dir.read_csv('taxa.csv', dicts=True):
             self._lids.add(row['taxon'])
-            glang = glangs[row['glottocode']]
+            glang = None
+            if row['glottocode']:
+                glang = glangs[row['glottocode']]
             args.writer.objects['LanguageTable'].append(dict(
                 ID=row['taxon'],
                 Name=row['taxon'],
-                Glottocode=row['glottocode'],
-                Latitude=glang.latitude,
-                Longitude=glang.longitude,
+                Glottocode=row['glottocode'] or None,
+                Latitude=glang.latitude if glang else None,
+                Longitude=glang.longitude if glang else None,
             ))

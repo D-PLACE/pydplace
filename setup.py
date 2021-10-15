@@ -11,10 +11,10 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     author='Robert Forkel',
     author_email='forkel@shh.mpg.de',
@@ -25,16 +25,15 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     install_requires=[
-        'pybtex<0.23; python_version < "3.6"',
-        'pybtex; python_version > "3.5"',
+        'pybtex',
         'attrs>=19.1',
         'clldutils>=3.5.0',
         'cldfcatalog',
         'csvw>=1.6',
         'pyglottolog>=3.0',
-        'python-nexus>=1.63',
+        'python-nexus>=2.2.0',
         'pycldf>=1.14',
         # ete3 doesn't install its dependencies properly, so we have to:
         'six',
@@ -56,6 +55,9 @@ setup(
     entry_points={
         'console_scripts': [
             'dplace=pydplace.__main__:main',
-        ]
+        ],
+        'cldfbench.commands': [
+            'dplace=pydplace.cldfbench_commands',
+        ],
     },
 )

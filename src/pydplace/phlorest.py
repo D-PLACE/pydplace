@@ -6,6 +6,7 @@ import shutil
 import pathlib
 import tempfile
 import subprocess
+import xml.etree.cElementTree as ElementTree
 
 import attr
 import cldfbench
@@ -33,9 +34,10 @@ def check_tree(tree, lids, log):
                 lids.remove(node.name)
             except KeyError:
                 if node.is_leaf:
-                    log.error('Summary tree references undefined leaf {}'.format(node.name))
+                    log.error('{} references undefined leaf {}'.format(tree.name, node.name))
                 else:
-                    log.warning('Summary tree references undefined inner node {}'.format(node.name))
+                    log.warning(
+                        '{} references undefined inner node {}'.format(tree.name, node.name))
 
     if lids:
         log.warning('extra taxa specified in LanguageTable: {}'.format(lids))
@@ -73,6 +75,7 @@ class Metadata(cldfbench.Metadata):
     analysis = attr.ib(default=None)
     family = attr.ib(default=None)
     cldf = attr.ib(default=None)
+    data = attr.ib(default=None)
     missing = attr.ib(default=attr.Factory(dict))
 
 
@@ -217,9 +220,13 @@ class Dataset(cldfbench.Dataset):
         ))
 
     def add_data(self, args, input):
-        nex = nexus.NexusReader(input)
+        nex = input if isinstance(input, (nexus.NexusReader, nexus.NexusWriter)) \
+            else nexus.NexusReader(input)
         assert all(t in self._lids for t in nex.data.taxa)
         assert all(t in self._lids for t in nex.data.matrix)
+        #
+        # FIXME: more validation! E.g. whether number of charstatelabels matches number of sites in matrix.
+        #
         nex.write_to_file(self.cldf_dir / 'data.nex')
         #
         # FIXME: handle the case when there already is a "dc:hasPart" property!
@@ -248,3 +255,66 @@ class Dataset(cldfbench.Dataset):
                 Latitude=glang.latitude if glang else None,
                 Longitude=glang.longitude if glang else None,
             ))
+
+
+def beast_to_nexus(filename, valid_states="01?"):
+    nex = nexus.NexusWriter()
+    xml = ElementTree.parse(str(filename))
+    for seq in xml.findall('./data/sequence'):
+        for i, state in enumerate([s for s in seq.get('value') if s != ' '], start=1):
+            assert state in valid_states, 'Invalid State %s' % state
+            nex.add(seq.get('taxon'), i, state)
+    #
+    # Now serialze and hack in the charstatelabel block!
+    #
+    new = []
+    for line in nex.write().split('\n'):
+        if line.strip().lower() == 'matrix':
+            # here's where we should put the charstatelabels!
+            chars = sorted(list(beast2chars(xml)))
+            if chars:
+                new.append('\tcharstatelabels')
+                for i, (n, label) in enumerate(chars, start=1):
+                    new.append('\t\t{} {}{}'.format(n, label, ',' if i != len(chars) else ''))
+                new.append('\t;')
+        new.append(line)
+    return nexus.NexusReader.from_string('\n'.join(new))
+
+
+def beast2chars(xml):
+    def find_filter(node):  # note recursive
+        for child in node:
+            find_filter(child)
+            (p, x, y) = get_partition(node)
+            if p and x and y:
+                return (p, x, y)
+
+    def get_partition(p):
+        x, y = [int(_) for _ in p.get('filter').split("-")]
+        return (p.get('id'), x, y)
+
+    def printchar(p, x, y, ascertained=False):
+        n = 1
+        for i in range(x, y + 1):
+            label = "%s-%s" % (p, 'ascertained' if n == 1 and ascertained else str(n))
+            yield i, label
+            n += 1
+
+    def get_by_id(data_id):
+        if data_id.startswith("@"):
+            data_id = data_id.lstrip("@")
+        return xml.find(".//alignment[@id='%s']" % data_id)
+
+    for treelh in xml.findall(".//distribution[@spec='TreeLikelihood']"):
+        if treelh.get('data'):
+            data = get_by_id(treelh.get('data'))
+            ascertained = data.get('ascertained') == 'true'
+            yield from printchar(*get_partition(data.find('./data')), ascertained=ascertained)
+        else:
+            data = treelh.find('./data')
+            ascertained = data.get('ascertained') == 'true'
+            if data.get('data'):
+                datadata = get_by_id(data.get('data'))
+            else:
+                datadata = treelh.find('./data/data')
+            yield from printchar(*get_partition(datadata), ascertained=ascertained)

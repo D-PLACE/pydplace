@@ -4,7 +4,7 @@ Augment sources.bib with lgcode for use as Glottolog reference provider.
 import collections
 
 
-def run(args):
+def run(args):  # pragma: no cover
     refs = collections.defaultdict(set)
 
     socs = {}

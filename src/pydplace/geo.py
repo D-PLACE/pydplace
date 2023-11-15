@@ -1,22 +1,33 @@
-try:
-    from shapely.geometry import shape, Point
-except ImportError:  # pragma: no cover
-    shape, Point = None, None
+"""
+Assign socities to TDWG's World Geographical Scheme for Recording Plant Distributions (WGSRPD)
+level 2 (regional or subcontinental) units.
+
+See https://www.tdwg.org/standards/wgsrpd/
+"""
+import pathlib
+
+import fiona
+from shapely.geometry import shape, Point
+
+GEOJSON = pathlib.Path(__file__).parent / 'wgsrpd_level2.geojson'
 
 
-def match(lon, lat, features):
-    if not shape:
-        return None, None  # pragma no cover
-    point = Point(lon, lat)
-    mindist, nearest = None, None
-    for feature in features:
-        polygon = shape(feature['geometry'])
-        if polygon.contains(point):
-            return feature, 0
+class Regions:
+    def __init__(self):
+        self.regions = [
+            (dict(f.properties.items()), shape(f['geometry']))
+            for f in fiona.collection(str(GEOJSON))]
 
-        dist = point.distance(polygon)
-        if mindist is None or mindist > dist:
-            mindist, nearest = dist, feature
+    def match(self, lon, lat):
+        point = Point(lon, lat)
+        mindist, nearest = None, None
+        for feature, polygon in self.regions:
+            if polygon.contains(point):
+                return feature['LEVEL2_NAM'], 0
 
-    assert mindist is not None
-    return nearest, mindist
+            dist = point.distance(polygon)
+            if mindist is None or mindist > dist:
+                mindist, nearest = dist, feature
+
+        assert mindist is not None
+        return nearest['LEVEL2_NAM'], mindist

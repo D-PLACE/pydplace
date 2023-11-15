@@ -1,5 +1,6 @@
 #
-from pydplace.api import Repos as API
+from .dataset import DatasetWithSocieties, DatasetWithoutSocieties
 
-DPLACE = API  # provide a more specific alias for the API class
 __version__ = "2.4.1.dev0"
+assert DatasetWithSocieties
+assert DatasetWithoutSocieties

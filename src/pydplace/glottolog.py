@@ -5,7 +5,6 @@ import re
 import itertools
 
 from csvw.dsv import UnicodeWriter, reader
-from ete3 import Tree
 from pyglottolog.api import Glottolog
 try:
     # Compatibility with pyglottolog < 2.x
@@ -13,7 +12,7 @@ try:
 except ImportError:
     Level = None
 
-from pydplace.util import comma_join, remove_subdirs
+from pydplace.util import remove_subdirs
 
 __all__ = ['update']
 

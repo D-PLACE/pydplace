@@ -26,7 +26,7 @@ jobs:
         sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
         sudo apt-get update
         sudo apt-get install gdal-bin libgdal-dev
-        pip install GDAL
+        pip install GDAL==3.6.4
         pip install .[test]
     - name: Test with pytest
       run: |

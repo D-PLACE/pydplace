@@ -16,15 +16,15 @@ def register(parser):
 def run(args):
     ds = get_dataset(args)
     passed = True
-    assert ds.id.startswith('dplace-dataset_with_societies-')
+    assert ds.id.startswith('dplace-dataset-')
     if subprocess.check_call(['cldf', 'validate', str(ds.cldf_dir)]) != 0:
-        passed = False
+        passed = False  # pragma: no cover
 
     cldf = ds.cldf_reader()
     if not cldf.properties.get('dc:title', '').startswith(
-            'D-PLACE dataset_with_societies derived from'):
+            'D-PLACE dataset derived from'):
         print(colored(
-            'Invalid dataset_with_societies title in CLDF: {}'.format(
+            'Invalid dataset title in CLDF: {}'.format(
                 cldf.properties.get('dc:title')),
             'red'))
         passed = False
@@ -35,7 +35,7 @@ def run(args):
                 'Dataset without societies must reference at lease one society set',
                 'red'))
             passed = False
-        elif not cldf.properties.get('dc:references'):
+        if not cldf.properties.get('dc:references'):
             print(colored(
                 'Referenced society sets not yet in CLDF. Re-run makecldf',
                 'red'))
@@ -52,3 +52,4 @@ def run(args):
             passed = False
 
     print(colored('OK' if passed else 'FAIL', 'green' if passed else 'red', attrs={'bold'}))
+    return 0

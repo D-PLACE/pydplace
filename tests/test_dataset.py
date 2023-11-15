@@ -20,3 +20,5 @@ def test_DatasetWithSocieties(ds_with_dir):
 
     ds = DS()
     ds._cmd_makecldf(argparse.Namespace())
+
+    assert ds.with_prefix('x') == 'TESTx'

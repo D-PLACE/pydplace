@@ -1,0 +1,4 @@
+ID,Name,Latitude,Longitude,Glottocode,Name_and_ID_in_source,xd_id,alt_names_by_society,main_focal_year,HRAF_name_ID,HRAF_ID,origLat,origLong,comment,glottocode_comment,region
+WNAI1,North Tlingit,59,-136,tlin1245,North Tlingit (J1),xd1431,North Tlinkit,,Tlingit (NA12),NA12,59,136,Original,"Note northern and southern tlingit considered distinct dialects of tli by some, but no codes available in Glottolog.",Subarctic America
+WNAI2,South Tlingit,57,-133.59,tlin1245,South Tlingit (J2),xd1082,Kolosh; Southern Tlingit; South Tlingit,,Tlingit (NA12),NA12,57,134,Revised,"Preferred name updated 9May2019 to distinguish from North Tlingit. Note northern and southern tlingit considered distinct dialects of tli by some, but no codes available in Glottolog.",Subarctic America
+WNAI3,Haida (Northern),54,-132,nort2938,North Masset Haida (J3),xd1068,North Masset Haida,,,,54,132,Original,,Western Canada

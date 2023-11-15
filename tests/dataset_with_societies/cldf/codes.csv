@@ -1,0 +1,28 @@
+ID,Var_ID,Name,Description,ord
+WNAI8-NA,WNAI8,Missing data,Missing data,99
+WNAI8-1,WNAI8,Western pines:spp,"Western pines: yellow pine, sugar pine, lodgepole pine, Douglas-fir",1
+WNAI8-2,WNAI8,Northwest conifers,"Northwestern conifers: Western larch, western white pine, Douglas-fir, redwood",2
+WNAI8-3,WNAI8,Sagebrush,Sagebrush,3
+WNAI8-4,WNAI8,Creosote-Mesquite,Creosote bush and mesquite,4
+WNAI8-5,WNAI8,Chaparral,Chaparral (broadleaf forest and scrub forest),5
+WNAI8-6,WNAI8,Pinon-Juniper,Pinon-juniper,6
+WNAI8-7,WNAI8,Bunchgrass,Bunchgrass,7
+WNAI8-8,WNAI8,Short grass,Short grass,8
+WNAI8-9,WNAI8,Tundra,Tundra,9
+WNAI8-10,WNAI8,4 and 6,"Codes 4 & 6 (creosote, mesquite, and juniper)",10
+WNAI8-11,WNAI8,6 and 8,Codes 6 & 8 (pinon-juniper and bunch grass),11
+WNAI11-NA,WNAI11,Missing data,Missing data,99
+WNAI11-1,WNAI11,Absent,Absent,1
+WNAI11-2,WNAI11,Present,Present,2
+WNAI11-3,WNAI11,Very Frequent,"Present and very frequent (a codominant species of the natural vegetation, after Kucher, 1964)",3
+WNAI11-4,WNAI11,Dominates the genus,Sufficiently frequent species to be sole representative of the genus shown on Kuchler’s map of dominant natural vegetation,4
+WNAI12-NA,WNAI12,Missing data,Missing data,99
+WNAI12-1,WNAI12,Absent,Absent,1
+WNAI12-2,WNAI12,Present,Present,2
+WNAI12-3,WNAI12,Very Frequent,Very frequent,3
+WNAI12-4,WNAI12,Dominates the genus,Only representative of the genus shown on map of dominant vegetation,4
+WNAI13-NA,WNAI13,Missing data,Missing data,99
+WNAI13-1,WNAI13,Absent,Absent,1
+WNAI13-2,WNAI13,Present,Present,2
+WNAI13-3,WNAI13,Very Frequent,Very frequent,3
+WNAI13-4,WNAI13,Dominates the genus,Only representative of the genus shown on map of dominant vegetation,4

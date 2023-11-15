@@ -23,13 +23,7 @@ end;
 """
 
 
-def reference(title, year):
-    return "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin. {0}. " \
-           "{1}. Jena: Max Planck Institute for the Science of Human History. " \
-           "https://glottolog.org/".format(title, year)
-
-
-def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
+def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):  # pragma: no cover
     if not fname.exists():
         fname.mkdir()
     tree.prune([str(n) for n in taxa_in_dplace])
@@ -52,7 +46,7 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):
     return tree
 
 
-def trees(societies_by_glottocode, langs, outdir, year, title):
+def trees(societies_by_glottocode, langs, outdir, year, title):  # pragma: no cover
     label_pattern = re.compile(r"'[^\[]+\[([a-z0-9]{4}[0-9]{4})[^']*'")
 
     def rename(n):
@@ -132,7 +126,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):
             writer.writerow([spec.get(k, '') for k in header])
 
 
-def languoids(api, langs, outdir):
+def languoids(api, langs, outdir):  # pragma: no cover
     _Level = Level or api.languoid_levels
     with UnicodeWriter(outdir / 'csv' / 'glottolog.csv') as writer:
         writer.writerow([
@@ -163,7 +157,7 @@ def languoids(api, langs, outdir):
             ])
 
 
-def update(repos, gl_repos, year, title):
+def update(repos, gl_repos, year, title):  # pragma: no cover
     societies_by_glottocode = {
         gc: list(socs) for gc, socs in itertools.groupby(
             sorted(repos.societies.values(), key=lambda s: s.glottocode),

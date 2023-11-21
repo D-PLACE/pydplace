@@ -37,12 +37,13 @@ def write_tree(tree, fname, taxa_in_dplace, societies_by_glottocode):  # pragma:
     with UnicodeWriter(fname.joinpath('taxa.csv')) as writer:
         writer.writerow(['taxon', 'glottocode', 'xd_ids', 'soc_ids'])
         for gc in sorted(taxa_in_dplace):
-            socs = societies_by_glottocode[gc]
+            # socs = societies_by_glottocode[gc]
             writer.writerow([
                 gc,
                 gc,
-                comma_join(sorted(set(s.xd_id for s in socs))),
-                comma_join(sorted(s.id for s in socs))])
+                # comma_join(sorted(set(s.xd_id for s in socs))),
+                # comma_join(sorted(s.id for s in socs))
+            ])
     return tree
 
 
@@ -66,7 +67,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):  # pragma: no co
                 families.append(lang)
         languoids[lang.id] = lang
 
-    glob = Tree()
+    glob = None  # Tree()
     glob.name = 'glottolog_global'
 
     for family in sorted(families, key=lambda f: f.name):
@@ -77,7 +78,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):  # pragma: no co
         if not taxa_in_dplace:
             continue  # pragma: no cover
 
-        tree = Tree("({0});".format(node.newick), format=3)
+        tree = None  # Tree("({0});".format(node.newick), format=3)
         tree.name = 'glottolog_{0}'.format(family.id)
         if family.level.name == 'family':
             tree = write_tree(tree, outdir / tree.name, taxa_in_dplace, societies_by_glottocode)
@@ -89,7 +90,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):  # pragma: no co
                 author='{0} ({1})'.format(title, family.name),
                 year=year,
                 scaling='',
-                reference=reference(title, year),
+                reference=None,
                 url='https://glottolog.org/resource/languoid/id/{}'.format(family.id))
         else:
             glottocodes_in_global_tree = glottocodes_in_global_tree.union(taxa_in_tree)
@@ -107,7 +108,7 @@ def trees(societies_by_glottocode, langs, outdir, year, title):  # pragma: no co
         author=title,
         year=year,
         scaling='',
-        reference=reference(title, year),
+        reference=None,
         url='https://glottolog.org/')
 
     index_path = outdir / 'index.csv'
@@ -132,7 +133,7 @@ def languoids(api, langs, outdir):  # pragma: no cover
         writer.writerow([
             'id', 'name', 'family_id', 'family_name', 'iso_code', 'language_id', 'macroarea',
             'lineage', 'level'])
-        for lang in sorted(langs, key=lambda l: l.id):
+        for lang in sorted(langs, key=lambda l_: l_.id):
             if lang.level == _Level.language:
                 lid = lang.id
             elif lang.level == _Level.dialect:

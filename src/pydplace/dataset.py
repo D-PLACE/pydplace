@@ -104,7 +104,7 @@ def data_schema(cldf, with_codes=True):
         {
             'name': 'source_coded_data',
             'dc:description':
-                'The source of the coded data, which was aggregated in this dataset_with_societies.',
+                'The source of the coded data, which was aggregated in this dataset.',
         },
         {
             'name': 'admin_comment',
@@ -164,7 +164,7 @@ def data_schema(cldf, with_codes=True):
                 'name': 'ord',
                 'datatype': 'integer',
             },
-            #var_id, code, description, name
+            # var_id, code, description, name
         )
         cldf.rename_column('CodeTable', 'parameterReference', 'Var_ID')
 
@@ -180,7 +180,7 @@ class WithPrefix:
 class DatasetWithSocieties(BaseDataset, WithPrefix):
     def __init__(self):
         BaseDataset.__init__(self)
-        # We enrich data with the cross-dataset_with_societies ID and a WGSRPD region.
+        # We enrich data with the cross-dataset ID and a WGSRPD region.
         self.xd_ids = {}
         for xd_id, ext in jsonlib.load(XD_IDS).items():
             for lid in ext:
@@ -205,7 +205,7 @@ class DatasetWithSocieties(BaseDataset, WithPrefix):
                 'name': 'Name_and_ID_in_source',
                 'dc:description':
                     'Society names identified as pejorative have been replaced with a preferred, '
-                    'English-language ethnonym. The name (and ID) as given in the source dataset_with_societies '
+                    'English-language ethnonym. The name (and ID) as given in the source dataset '
                     'is kept in this field.',
             },
             {
@@ -275,7 +275,7 @@ class DatasetWithSocieties(BaseDataset, WithPrefix):
 
     def add_society(self, writer, **props):
         """
-        Enrich and add the data of a society for the CLDF dataset_with_societies.
+        Enrich and add the data of a society for the CLDF dataset.
 
         :param props:
         """

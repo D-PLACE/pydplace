@@ -53,7 +53,7 @@ pytest
 ### Release workflow
 
 ```shell
-cldfbench makecldf --glottolog-version v4.8 --with-cldfreadme cldfbench_<id>.py
+cldfbench makecldf --glottolog-version v5.0 --with-cldfreadme cldfbench_<id>.py
 pytest
 ```
 
@@ -64,9 +64,9 @@ cldfbench zenodo --communities dplace cldfbench_<id>.py
 cldfbench cldfviz.map cldf --pacific-centered --format png --width 20 --output map.png --with-ocean --no-legend
 cldfbench readme cldfbench_<id>.py
 dplace check cldfbench_<id>.py
-git commit -a -m"release v3.0"
+git commit -a -m"release v3.1"
 git push origin
-dplace release cldfbench_<id>.py v3.0
+dplace release cldfbench_<id>.py v3.1
 ```
 
 Then create a release on GitHub, thereby pushing the repos to Zenodo.

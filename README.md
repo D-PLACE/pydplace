@@ -55,6 +55,11 @@ pytest
 ```shell
 cldfbench makecldf --glottolog-version v4.8 --with-cldfreadme cldfbench_<id>.py
 pytest
+```
+
+Now inspect the changes and add a corresponding section to `CHANGELOG.md`.
+
+```shell
 cldfbench zenodo --communities dplace cldfbench_<id>.py
 cldfbench cldfviz.map cldf --pacific-centered --format png --width 20 --output map.png --with-ocean --no-legend
 cldfbench readme cldfbench_<id>.py

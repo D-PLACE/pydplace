@@ -59,8 +59,9 @@ cldfbench zenodo --communities dplace cldfbench_<id>.py
 cldfbench cldfviz.map cldf --pacific-centered --format png --width 20 --output map.png --with-ocean --no-legend
 cldfbench readme cldfbench_<id>.py
 dplace check cldfbench_<id>.py
-git commit -a -m"release vX.Y"
+git commit -a -m"release v3.0"
 git push origin
+dplace release cldfbench_<id>.py v3.0
 ```
 
 Then create a release on GitHub, thereby pushing the repos to Zenodo.

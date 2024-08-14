@@ -285,6 +285,12 @@ class DatasetWithSocieties(BaseDataset, WithPrefix):
         )
         writer.objects['LanguageTable'].append(props)
 
+    def local_makecldf(self, args):
+        """
+        Datasets can hook up any custom processing to happen at the end of the CLDF conversion.
+        """
+        pass
+
     def cmd_makecldf(self, args):
         data_schema(args.writer.cldf)
         self.schema(args.writer.cldf)
@@ -309,6 +315,7 @@ class DatasetWithSocieties(BaseDataset, WithPrefix):
                 comment=row['Comment'],
                 glottocode_comment=row['glottocode_comment'],
             )
+        self.local_makecldf(args)
 
     def cmd_readme(self, args):
         print('gh repo edit --description "{}" --add-topic "ethnology"'.format(self.metadata.title))

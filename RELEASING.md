@@ -28,6 +28,7 @@ git tag -a v<VERSION> -m "<VERSION> release"
 
 - Release to PyPI:
 ```shell
+rm dist/*
 python setup.py clean --all
 python -m build -n
 twine upload dist/*

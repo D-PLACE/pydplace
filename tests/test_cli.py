@@ -33,6 +33,7 @@ def test_check(capsys, dataset_with_societies, dataset_without_societies):
     out, _ = capsys.readouterr()
     assert 'must reference' in out
     assert 'Re-run' in out
+    assert 'duplicate reference' in out
 
 
 def test_readme(dataset_with_societies, dataset_without_societies):

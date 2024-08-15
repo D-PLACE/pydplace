@@ -51,5 +51,10 @@ def run(args):
             print(colored('{} not found'.format(fname), 'red'))
             passed = False
 
+    for dp in ds.cldf_reader().objects('ValueTable'):
+        if len(dp.cldf.source) != len(set(dp.cldf.source)):
+            print(colored('{} duplicate reference'.format(dp.cldf.source), 'red'))
+            passed = False
+
     print(colored('OK' if passed else 'FAIL', 'green' if passed else 'red', attrs={'bold'}))
     return 0

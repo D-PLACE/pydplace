@@ -67,7 +67,8 @@ def add_data(raw_dir, writer):
             r = src
             if pages:
                 r += '[{}]'.format(pages)
-            ref.append(r)
+            if r not in ref:
+                ref.append(r)
         val = codes.get((row['var_id'], row['code']), row['code'])
         if val in {'NA', '?'}:
             val = None

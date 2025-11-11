@@ -1,6 +1,5 @@
 
-Releasing pydplace
-==================
+# Releasing pydplace
 
 - Change version to the new version number in
   - ``setup.cfg``
